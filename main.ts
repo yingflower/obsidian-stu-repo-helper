@@ -1,134 +1,228 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Notice, Plugin, TAbstractFile} from 'obsidian';
+import * as path from 'path'
 
-// Remember to rename these classes and interfaces!
-
-interface MyPluginSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
+const gTTS = require('node-gtts')
 
 export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
 
 	async onload() {
-		await this.loadSettings();
+		this.registerEvent(
+			this.app.workspace.on('files-menu', (menu, files) => {
+        var isImages = isImageFiles(files)
+        var isMarkdowns = isMarkdownFiles(files)
+        if (isImages || isMarkdowns) {
+          menu.addItem((item) => {
+            item.setTitle('笔记助手')
+            const submenu = item.setSubmenu()
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+            if (isImages) {
+              // Create a new note
+              submenu.addItem(item => {
+                item
+                  .setTitle('加入新笔记')
+                  .setIcon('document')
+                  .onClick(async() => {
+                    await createImagesNote(files)
+                  });
+              })
+           }
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+           if (isMarkdowns) {
+              // Create audios
+              submenu.addItem(item => {
+                item
+                  .setTitle('生成音频')
+                  .setIcon('document')
+                  .onClick(async() => {
+                    generateAudio(files)
+                  });
+              })
+            }
+          });
+        }
+			})
+		);
 
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
+		this.registerEvent(
+			this.app.workspace.on('file-menu', (menu, file) => {
+        var isImage = isFileImage(file.path)
+        var isMarkdown = isFileMarkdown(file.path)
+        if (isImage || isMarkdown) {
+          menu.addItem((item) => {
+            item.setTitle('笔记助手')
+            const submenu = item.setSubmenu()
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
+            if (isImage) {
+              // Create a new note
+              submenu.addItem(item => {
+                item
+                  .setTitle('加入新笔记')
+                  .setIcon('document')
+                  .onClick(async() => {
+                    var files = [file]
+                    await createImagesNote(files)
+                  });
+              })
+            }
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+            if (isMarkdown) {
+              // Create Audio
+              submenu.addItem(item => {
+                item
+                  .setTitle('生成音频')
+                  .setIcon('document')
+                  .onClick(async() => {
+                    var files = [file]
+                    generateAudio(files)
+                  });
+              })
+            }
+          });
+        }
+			})
+		);
 	}
 
 	onunload() {
-
-	}
-
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
+function isFileImage(path: string): boolean {
+  return (
+    path.endsWith('.png') || path.endsWith('.jpg') || path.endsWith('.jpeg') ||
+    path.endsWith('.webp') || path.endsWith('.gif') || path.endsWith('.bmp')
+  )
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+function isImageFiles(files: TAbstractFile[]): boolean {
+  var j:any
+  for (j in files) {
+    var f_path = files[j].path
+    if (!isFileImage(f_path)) {
+      return false
+    }
+  }
+  return true
+}
 
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+function isFileMarkdown(path: string): boolean {
+  return path.endsWith('.md')
+}
+function isMarkdownFiles(files: TAbstractFile[]): boolean {
+  var j:any
+  for (j in files) {
+    var f_path = files[j].path
+    if (!isFileMarkdown(f_path)) {
+      return false
+    }
+  }
+  return true
+}
 
-	display(): void {
-		const {containerEl} = this;
+async function createNote(name: string, contents = ''): Promise<void> {
+  try {
+    let pathPrefix: string
+    switch (app.vault.getConfig('newFileLocation')) {
+      case 'current':
+        pathPrefix = app.workspace.getActiveFile()?.parent?.path ?? ''
+        break
+      case 'folder':
+        pathPrefix = app.vault.getConfig('newFileFolderPath') as string
+        break
+      default: // 'root'
+        pathPrefix = ''
+        break
+    }
+    
+    if (pathPrefix) {
+      pathPrefix += '/'
+    }
+    let path = `${pathPrefix}${name}`
+    console.log(`pathPrefix: ${pathPrefix}, name: ${name}`)
+    // Check if file already exists
+    if (app.vault.getAbstractFileByPath(`${path}.md`)) {
+      // Append a number to the end of the file name
+      let i = 1
+      while (await app.vault.getAbstractFileByPath(`${path} ${i}.md`)) {
+        i++
+      }
+      path += ` ${i}`
+    }
 
-		containerEl.empty();
+    // Create and open the file
+    await app.vault.create(`${path}.md`, contents)
+    await app.workspace.openLinkText(path, '')
+  } catch (e) {
+    new Notice('Text Extract - Could not create note: ' + (e as any).message)
+    throw e
+  }
+}
 
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+async function createImagesNote(files: TAbstractFile[]) {
+  var j:any
+  var file_paths:string[] = new Array(files.length)
+  for (j in files) {
+    console.log(`ppath: ${files[j].parent.path}, pname: ${files[j].parent.name}`)
+    file_paths[j] = files[j].path
+  }
+  file_paths.sort()
+  var contents:string = ''
+  for (j in file_paths) {
+    console.log(file_paths[j])
+    contents += `![[${file_paths[j]}]]\n`
+  }
+  console.log(contents)
+  // Create a new note and open it
+  await createNote("Undefined", contents)
+}
+
+async function generateAudio(files: TAbstractFile[]) {
+  var j:any
+  for (j in files) {
+    var new_path = files[j].basename + `_${j}`
+    file = files[j]
+    var md_content = await app.vault.read(file)
+    //console.log(`read: ${md_content}`)
+    var text = getPlainText(md_content)
+    //console.log(`text: ${text}`)
+
+    // Create output audio dir
+    audio_path = path.join(file.parent.path, '_audios')
+    console.log(`audio_path: ${audio_path}`)
+    await app.vault.adapter.mkdir(audio_path)
+    // Get output mp3 file path
+    var abs_path = app.vault.adapter.getFullPath(file.path)
+    var output_path = path.dirname(abs_path)
+    var output_fname = path.basename(abs_path, path.extname(abs_path))+'.mp3'
+    var output_fpath = path.join(output_path, '_audios', output_fname)
+    //console.log(output_fpath)
+
+    // Generate TTS audio
+    var gtts = new gTTS('en', true)
+    await gtts.save(output_fpath, text, (err, result) => {
+      if (err) {
+        throw new Error(err)
+      }
+      console.log(`Audio saved to ${output_fpath}`)
+    })
+    // Insert Audio file to the md content
+    audio_fpath = path.join(audio_path, output_fname)
+    md_content = `\`\`\`audio-player\n [[${audio_fpath}]]\n\`\`\`\n` + md_content
+    console.log(md_content)
+    await app.vault.adapter.write(file.path, md_content)
+  }
+}
+
+function getPlainText(markdown: string): string {
+  // 删除代码段（包括行内代码和代码块）
+  let plainText = markdown.replace(/`{1,3}[^`]*`{1,3}/g, '');
+  plainText = plainText.replace(/```[\s\S]*?```/g, '');
+
+  // 删除图片链接
+  plainText = plainText.replace(/!\[.*?\]\(.*?\)/g, '');
+
+  // 删除超链接
+  plainText = plainText.replace(/\[.*?\]\(.*?\)/g, '');
+
+  return plainText;
 }
