@@ -1,13 +1,13 @@
 import { App, Notice, Plugin, TAbstractFile, Platform} from 'obsidian';
-import { MarkdownHelperSettings, DEFAULT_SETTINGS } from './settings';
-import { MarkdownHelperSettingTab } from './settings';
+import { KnowledgeBaseHelperSettings, DEFAULT_SETTINGS } from './settings';
+import { KnowledgeBaseHelperSettingTab } from './settings';
 
-export default class MarkdownHelperPlugin extends Plugin {
-  settings: MarkdownHelperSettings;
+export default class KnowledgeBaseHelperPlugin extends Plugin {
+  settings: KnowledgeBaseHelperSettings;
 	async onload() {
-    this.addSettingTab(new MarkdownHelperSettingTab(this.app, this));
+    this.addSettingTab(new KnowledgeBaseHelperSettingTab(this.app, this));
     await this.loadSettings();
-    console.log('Markdown Helper loaded');
+    console.log('Student Knowledge Base Helper loaded');
     console.log('Settings:', this.settings);
     console.log('Platform isDesktop:', Platform.isDesktop);
     console.log('Platform isMobile:', Platform.isMobile);
@@ -31,7 +31,7 @@ export default class MarkdownHelperPlugin extends Plugin {
               item.setTitle('Generate Audio')
               .setIcon('document')
               .onClick(async() => {
-                generateAudio(files, this.settings.ttsOutputPath, this.settings.ttsLanguage)
+                generateAudio(files, this.settings)
               });
             });
           }
@@ -46,11 +46,12 @@ export default class MarkdownHelperPlugin extends Plugin {
         if (isImage || isMarkdown) {
           if (isImage) {
             menu.addItem((item) => {
-              item.setTitle('Add to Note')
+              item.setTitle('生成笔记')
               .setIcon('document')
               .onClick(async() => {
                 var files = [file]
-                await createImagesNote(files)
+                //await createImagesNote(files)
+                await imageToText(file, this.settings)
               });
             })
           }
@@ -59,11 +60,11 @@ export default class MarkdownHelperPlugin extends Plugin {
             // Create Audio
             menu.addItem(item => {
               item
-                .setTitle('Generate Audio')
+                .setTitle('生成音频')
                 .setIcon('document')
                 .onClick(async() => {
                   var files = [file]
-                  generateAudio(files, this.settings.ttsOutputPath, this.settings.ttsLanguage)
+                  generateAudio(files, this.settings)
                 });
             })
           }
@@ -71,7 +72,45 @@ export default class MarkdownHelperPlugin extends Plugin {
         }
 			})
 		);
+
+    this.registerEvent(
+      this.app.workspace.on('editor-menu', (menu, editor, view) => {
+        if (Platform.isDesktop) {
+          const selection = editor.getSelection();
+          console.log('selection:', selection);
+          const imageRegex = /!\[\[(.*?)\]\]/;
+          const match = selection.match(imageRegex);
+          if (match) {
+            menu.addItem((item) => {
+              item.setTitle('文字识别')
+              .setIcon('document')
+              .onClick(async() => {
+                let imageFile = match[1]
+                console.log('文字识别:', imageFile);
+                const file = await this.getLinkedFile(imageFile);
+                if (!file) {
+                  new Notice(`图片文件不存在: ${imageFile}`);
+                } else {
+                  let text = await imageToText(file, this.settings)
+                  const corsor = editor.getCursor();
+                  const nextLinePos = {line: corsor.line + 1, ch: 0};
+                  editor.replaceRange(text, nextLinePos);
+                }
+              });
+            })
+          }
+        }
+      })
+    )
 	}
+
+  async getLinkedFile(link: string): Promise<TAbstractFile | null> {
+    const file = this.app.metadataCache.getFirstLinkpathDest(link, '');
+    if (!file) {
+      return null;
+    }
+    return this.app.vault.getAbstractFileByPath(file.path);
+  }
 
 	onunload() {
 	}
@@ -174,7 +213,7 @@ async function createImagesNote(files: TAbstractFile[]) {
   await createNote("Untitled", contents)
 }
 
-async function generateAudio(files: TAbstractFile[], apath: string, lang: string) {
+async function generateAudio(files: TAbstractFile[], settings: KnowledgeBaseHelperSettings) {
   const PathLib = require('path')
   const gTTS = require('node-gtts')
   
@@ -189,18 +228,18 @@ async function generateAudio(files: TAbstractFile[], apath: string, lang: string
     //console.log(`text: ${text}`)
 
     // Create output audio dir
-    audio_path = PathLib.join(file.parent.path, apath)
+    audio_path = PathLib.join(file.parent.path, settings.audioPath)
     console.log(`audio_path: ${audio_path}`)
     await app.vault.adapter.mkdir(audio_path)
     // Get output mp3 file path
     var abs_path = app.vault.adapter.getFullPath(file.path)
     var output_path = PathLib.dirname(abs_path)
     var output_fname = PathLib.basename(abs_path, PathLib.extname(abs_path))+'.mp3'
-    var output_fpath = PathLib.join(output_path, apath, output_fname)
+    var output_fpath = PathLib.join(output_path, settings.audioPath, output_fname)
     //console.log(output_fpath)
 
     // Generate TTS audio
-    var gtts = new gTTS(lang, true)
+    var gtts = new gTTS(settings.ttsLanguage, true)
     await gtts.save(output_fpath, text, (err, result) => {
       if (err) {
         throw new Error(err)
@@ -227,4 +266,37 @@ function getPlainText(markdown: string): string {
   plainText = plainText.replace(/\[.*?\]\(.*?\)/g, '');
 
   return plainText;
+}
+
+async function imageToText(file: TAbstractFile, settings: KnowledgeBaseHelperSettings): Promise<string> {
+  const AipOcrClient = require('baidu-aip-sdk').ocr;
+  try {
+    const client = new AipOcrClient(settings.ocrSettings.appID, settings.ocrSettings.apiKey, settings.ocrSettings.apiSecret);
+    // 读取图片文件并转换为 Base64 编码
+    var image_content =  await app.vault.adapter.readBinary(file.path)
+    var image = Buffer.from(image_content).toString('base64')
+
+    // 调用百度云 OCR 的通用文字识别接口
+    var options = {};
+    options["language_type"] = "CHN_ENG";
+    options["paragraph"] = "true";
+
+    const result = await client.accurateBasic(image, options);
+    console.log(JSON.stringify(result));
+    // 提取识别结果中的文字
+    let text = '';
+    if (result.paragraphs_result) {
+      result.paragraphs_result.forEach((item: { words_result_idx: number[] }) => {
+        for (let i = 0; i < item.words_result_idx.length; i++) {
+          text += result.words_result[item.words_result_idx[i]].words + ' ';
+        }
+        text += '\n';
+      });
+    }
+    console.log('图片转文字段落结果:', text);
+    return text;
+  } catch (error) {
+      console.error('图片转文字出错:', error);
+      throw error;
+  }
 }

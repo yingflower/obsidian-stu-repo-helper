@@ -1,6 +1,6 @@
 {
-	"id": "md-helper",
-	"name": "Markdown Helper",
+	"id": "skb-helper",
+	"name": "Student Knowledge Base Helper",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Generate markdown file automaticly.",
