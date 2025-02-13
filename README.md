@@ -1,11 +1,11 @@
-# Obsidian Student Knowledge Base Helper
+# Obsidian Student Repository Helper
 
-This is a Student Knowledge Base Helper for Obsidian (https://obsidian.md).
+This is a Student Repository Helper for Obsidian (https://obsidian.md).
 
 This project uses TypeScript to provide type checking and documentation.
 The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
 
-This Student Knowledge Base Helper demonstrates some of the basic functionality the plugin API can do.
+This Student Repository Helper demonstrates some of the basic functionality the plugin API can do.
 - Adds a ribbon icon, which shows a Notice when clicked.
 - Adds a command "Open Sample Modal" which opens a Modal.
 - Adds a plugin setting tab to the settings page.
