@@ -53,8 +53,7 @@ export default class StudentRepoPlugin extends Plugin {
               .setIcon('document')
               .onClick(async() => {
                 var files = [file]
-                //await createImagesNote(files)
-                await imageToText(file, this.settings)
+                await createImagesNote(files)
               });
             })
           }
@@ -138,7 +137,7 @@ export default class StudentRepoPlugin extends Plugin {
   async getAudioFilePath(tfile: TAbstractFile, settings: StudentRepoSettings): {full_path: string; normalized_path: string} {
     const PathLib = require('path')
     // Create output audio dir
-    var audio_path = PathLib.join(tfile.parent.path, settings.audioPath)
+    var audio_path = PathLib.join(tfile.parent.path, settings.ttsOutputPath)
     //console.log(`audio_path: ${audio_path}`)
     await this.app.vault.adapter.mkdir(audio_path)
     // Get output mp3 file path
@@ -146,7 +145,7 @@ export default class StudentRepoPlugin extends Plugin {
     //console.log(`md_full_path: ${md_full_path}`)
     var output_fname = PathLib.basename(md_full_path, PathLib.extname(md_full_path))+'.mp3'
     //console.log(`output_fname: ${output_fname}`)
-    var full_path = PathLib.join(PathLib.dirname(md_full_path), settings.audioPath, output_fname)
+    var full_path = PathLib.join(PathLib.dirname(md_full_path), settings.ttsOutputPath, output_fname)
     //console.log(`output_full_path: ${full_path}`)
     var normalized_path = PathLib.join(audio_path, output_fname)
     //console.log(`normalized_path: ${normalized_path}`)

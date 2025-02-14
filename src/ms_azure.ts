@@ -94,7 +94,7 @@ export async function textToSpeechRest(text: string, subscriptionKey: string): P
 export async function textToSpeech(text: string, output_fpath: string, subscriptionKey: string): Promise<void> {
     const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
     // 设置语音合成的声音，可以根据需求修改
-    speechConfig.speechSynthesisVoiceName = "en-US-AvaMultilingualNeural";
+    speechConfig.speechSynthesisVoiceName = "en-GB-SoniaNeural";
 
     // 创建音频配置，这里将音频保存为文件
     const audioConfig = sdk.AudioConfig.fromAudioFileOutput(output_fpath);
