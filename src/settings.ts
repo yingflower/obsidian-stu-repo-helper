@@ -1,6 +1,10 @@
 import StudentRepoPlugin from "./main";
 import { App, PluginSettingTab, Setting } from "obsidian";
 
+export interface StudentSettings {
+  grade: string;
+}
+
 export interface OcrSettings {
   appID: string;
   apiKey: string;
@@ -18,17 +22,30 @@ export interface AzureSettings {
   mtSubscriptionKey: string;
 }
 
+export interface SpeechSettings {
+  speechLanguage: string,
+  speechOutputPath: string,
+  speechVoice: string
+}
 export interface StudentRepoSettings {
-  ttsLanguage: string;
-  ttsOutputPath: string;
+  stuSettings: StudentSettings;
+  speechSettings: SpeechSettings;
   ocrSettings: OcrSettings;
   llmSettings: LLMSettings;
   azureSettings: AzureSettings;
 }
 
+
+
 export const DEFAULT_SETTINGS: StudentRepoSettings = {
-  ttsLanguage: 'en',
-  ttsOutputPath: '_audios',
+  stuSettings: {
+    grade: '小学四年级'
+  },
+  speechSettings: {
+    speechLanguage: 'en',
+    speechVoice: 'en-GB-SoniaNeural',
+    speechOutputPath: '_audios',
+  },
   ocrSettings: {
     appID: '',
     apiKey: '',
@@ -58,13 +75,24 @@ export class StudentRepoSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     containerEl.createEl('h1', {text: '学生知识库助手'});
+    new Setting(containerEl)
+      .setName('学生就读年级')
+      .setDesc('学生就读年级')
+      .addText(text => text
+        .setPlaceholder('小学四年级')
+        .setValue(this.plugin.settings.stuSettings.grade)
+        .onChange(async (value) => {
+          this.plugin.settings.stuSettings.grade = value;
+          await this.plugin.saveSettings();
+        }));
 
     containerEl.createEl('h2', {text: '大语言模型'});
+    
     new Setting(containerEl)
       .setName('API Base')
-      .setDesc('豆包大模型 API Base')
+      .setDesc('大模型 API URL')
       .addText(text => text
-        .setPlaceholder('你申请到的API Base')
+        .setPlaceholder('你申请到的API URL')
         .setValue(this.plugin.settings.llmSettings.apiBase)
         .onChange(async (value) => {
           this.plugin.settings.llmSettings.apiBase = value;
@@ -72,7 +100,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Key')
-      .setDesc('豆包大模型 API Key')
+      .setDesc('大模型 API Key')
       .addText(text => text
         .setPlaceholder('你申请到的API Key')
         .setValue(this.plugin.settings.llmSettings.apiKey)
@@ -82,7 +110,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('Model Name')
-      .setDesc('豆包大模型 Model Name')
+      .setDesc('大模型 Model Name')
       .addText(text => text
         .setPlaceholder('你申请到的Model Name')
         .setValue(this.plugin.settings.llmSettings.modelName)
@@ -90,7 +118,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           this.plugin.settings.llmSettings.modelName = value;
           await this.plugin.saveSettings();
         }));
-
+    
     containerEl.createEl('h2', {text: '文字识别'});
     new Setting(containerEl)
       .setName('APP ID')
@@ -130,9 +158,9 @@ export class StudentRepoSettingTab extends PluginSettingTab {
       .addDropdown((dropdown) => {
         dropdown.addOption('en', '英语');
         dropdown.addOption('zh-cn', '普通话');
-        dropdown.setValue(this.plugin.settings.ttsLanguage);
+        dropdown.setValue(this.plugin.settings.speechLanguage);
         dropdown.onChange((option) => {
-            this.plugin.settings.ttsLanguage = option;
+            this.plugin.settings.speechLanguage = option;
             this.plugin.saveSettings();
         });
       });
@@ -141,9 +169,9 @@ export class StudentRepoSettingTab extends PluginSettingTab {
       .setDesc('音频存放位置')
       .addText(text => text
         .setPlaceholder('_audio')
-        .setValue(this.plugin.settings.ttsOutputPath)
+        .setValue(this.plugin.settings.speechOutputPath)
         .onChange(async (value) => {
-          this.plugin.settings.ttsOutputPath = value;
+          this.plugin.settings.speechOutputPath = value;
           await this.plugin.saveSettings();
         }));
     */
@@ -158,6 +186,18 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           this.plugin.settings.azureSettings.speechSubscriptionKey = value;
           await this.plugin.saveSettings();
         }));
+    new Setting(containerEl)
+      .setName('语音风格')
+      .setDesc('生成语音的风格')
+      .addDropdown((dropdown) => {
+        dropdown.addOption('en-GB-SoniaNeural', '英式');
+        dropdown.addOption('en-US-AmandaMultilingualNeural', '美式');
+        dropdown.setValue(this.plugin.settings.speechSettings.speechVoice);
+        dropdown.onChange((option) => {
+            this.plugin.settings.speechSettings.speechVoice = option;
+            this.plugin.saveSettings();
+        });
+      });
     new Setting(containerEl)
     .setName('翻译服务Key')
     .setDesc('Microsoft Azure Translator Subscription Key')

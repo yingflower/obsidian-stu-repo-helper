@@ -3,6 +3,8 @@ import { StudentRepoSettings, DEFAULT_SETTINGS } from './settings';
 import { StudentRepoSettingTab } from './settings';
 import { textToSpeech, translateText } from "./ms_azure";
 import { imageToText} from "./baidu_ai";
+import { GENERATE_SIMILAR_TOPIC_TEMPLATE, GENERATE_LEARNING_POINTS_TEMPLATE, EXPLAIN_KNOWLEDGE_POINT_TEMPLATE } from './prompt'
+import { sendLLMRequest } from './llm'
 
 export default class StudentRepoPlugin extends Plugin {
   settings: StudentRepoSettings;
@@ -13,18 +15,6 @@ export default class StudentRepoPlugin extends Plugin {
     console.log('Settings:', this.settings);
     console.log('Platform isDesktop:', Platform.isDesktop);
     console.log('Platform isMobile:', Platform.isMobile);
-    /**
-    this.addCommand({
-      id: 'insert-todays-date',
-      name: 'Insert today\'s date',
-      editorCallback: (editor: Editor) => {
-        editor.replaceRange(
-          moment().format('YYYY-MM-DD'),
-          editor.getCursor()
-        );
-      },
-    });
-    */
 
     this.registerEvent(
 			this.app.workspace.on('files-menu', (menu, files) => {
@@ -97,7 +87,7 @@ export default class StudentRepoPlugin extends Plugin {
                   console.time('textToSpeech')
                   //let audio_buffer = await textToSpeech(selection, this.settings.azureSettings.speechSubscriptionKey)
                   //await app.vault.adapter.writeBinary(normalized_path, audio_buffer)
-                  await textToSpeech(selection, full_path, this.settings.azureSettings.speechSubscriptionKey)
+                  await textToSpeech(selection, full_path, this.settings.azureSettings.speechSubscriptionKey, this.settings.speechSettings.speechVoice)
                   console.timeEnd('textToSpeech')
                   console.log(`Audio saved to ${normalized_path}`);
                   //let audio_fpath = await generateBaiduTTS(selection, view.file, this.settings)
@@ -119,8 +109,36 @@ export default class StudentRepoPlugin extends Plugin {
                   editor.replaceRange(`(${translatedText})`, endOffset);
                 });
             })
-          }
 
+            // 题目扩展
+            menu.addItem(item => {
+              item
+                .setTitle('学生知识库: 题目扩展')
+                .setIcon('document')
+                .onClick(async() => {
+                  const prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', selection);
+                  const result = await sendLLMRequest(prompt, this.settings.llmSettings);
+                  const endOffset = editor.getCursor('to');
+                  const nextLinePos = {line: endOffset.line + 1, ch: 0};
+                  editor.replaceRange(`${addQuoteToText(result)}\n`, nextLinePos);
+                });
+            })
+
+            // 知识点分析
+            menu.addItem(item => {
+              item
+                .setTitle('学生知识库: 知识点分析')
+                .setIcon('document')
+                .onClick(async() => {
+                  const prompt = GENERATE_LEARNING_POINTS_TEMPLATE.replace('{TOPIC}', selection);
+                  const result = await sendLLMRequest(prompt, this.settings.llmSettings);
+                  const endOffset = editor.getCursor('to');
+                  const nextLinePos = {line: endOffset.line + 1, ch: 0};
+                  editor.replaceRange(`${addQuoteToText(result)}\n`, nextLinePos);
+                });
+            })
+
+          }
         }
       })
     )
@@ -137,7 +155,7 @@ export default class StudentRepoPlugin extends Plugin {
   async getAudioFilePath(tfile: TAbstractFile, settings: StudentRepoSettings): {full_path: string; normalized_path: string} {
     const PathLib = require('path')
     // Create output audio dir
-    var audio_path = PathLib.join(tfile.parent.path, settings.ttsOutputPath)
+    var audio_path = PathLib.join(tfile.parent.path, settings.speechSettings.speechOutputPath)
     //console.log(`audio_path: ${audio_path}`)
     await this.app.vault.adapter.mkdir(audio_path)
     // Get output mp3 file path
@@ -145,7 +163,7 @@ export default class StudentRepoPlugin extends Plugin {
     //console.log(`md_full_path: ${md_full_path}`)
     var output_fname = PathLib.basename(md_full_path, PathLib.extname(md_full_path))+'.mp3'
     //console.log(`output_fname: ${output_fname}`)
-    var full_path = PathLib.join(PathLib.dirname(md_full_path), settings.ttsOutputPath, output_fname)
+    var full_path = PathLib.join(PathLib.dirname(md_full_path), settings.speechSettings.speechOutputPath, output_fname)
     //console.log(`output_full_path: ${full_path}`)
     var normalized_path = PathLib.join(audio_path, output_fname)
     //console.log(`normalized_path: ${normalized_path}`)
@@ -239,3 +257,6 @@ async function createImagesNote(files: TAbstractFile[]) {
   await createNote("Untitled", contents)
 }
 
+function addQuoteToText(text: string): string {
+  return '\n> [!NOTE]\n' + text.split('\n').map(line => `> ${line}`).join('\n')
+}
