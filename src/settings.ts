@@ -5,10 +5,15 @@ export interface StudentSettings {
   grade: string;
 }
 
+export interface AccessToken {
+  token: string
+	exp: number
+}
 export interface OcrSettings {
   appID: string;
   apiKey: string;
   apiSecret: string;
+  accessToken: AccessToken;
 }
 
 export interface LLMSettings {
@@ -49,7 +54,11 @@ export const DEFAULT_SETTINGS: StudentRepoSettings = {
   ocrSettings: {
     appID: '',
     apiKey: '',
-    apiSecret: ''
+    apiSecret: '',
+    accessToken: {
+      token: '',
+      exp: 0
+    },
   },
   llmSettings: {
     apiBase: '',
@@ -74,10 +83,10 @@ export class StudentRepoSettingTab extends PluginSettingTab {
     let {containerEl} = this;
     containerEl.empty();
 
-    containerEl.createEl('h1', {text: '学生知识库助手'});
+    containerEl.createEl('h1', {text: this.plugin.trans.pluginName});
     new Setting(containerEl)
-      .setName('学生就读年级')
-      .setDesc('学生就读年级')
+      .setName(this.plugin.trans.studentGrade)
+      .setDesc(this.plugin.trans.studentGrade)
       .addText(text => text
         .setPlaceholder('小学四年级')
         .setValue(this.plugin.settings.stuSettings.grade)
@@ -86,13 +95,13 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    containerEl.createEl('h2', {text: '大语言模型'});
+    containerEl.createEl('h2', {text: this.plugin.trans.llmSetting});
     
     new Setting(containerEl)
-      .setName('API Base')
-      .setDesc('大模型 API URL')
+      .setName('API URL')
+      .setDesc(`${this.plugin.trans.llmProvider} LLM API URL`)
       .addText(text => text
-        .setPlaceholder('你申请到的API URL')
+        .setPlaceholder('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions')
         .setValue(this.plugin.settings.llmSettings.apiBase)
         .onChange(async (value) => {
           this.plugin.settings.llmSettings.apiBase = value;
@@ -100,9 +109,9 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Key')
-      .setDesc('大模型 API Key')
+      .setDesc(`${this.plugin.trans.llmProvider} LLM API Key`)
       .addText(text => text
-        .setPlaceholder('你申请到的API Key')
+        .setPlaceholder('sk-***')
         .setValue(this.plugin.settings.llmSettings.apiKey)
         .onChange(async (value) => {
           this.plugin.settings.llmSettings.apiKey = value;
@@ -110,19 +119,19 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('Model Name')
-      .setDesc('大模型 Model Name')
+      .setDesc(`${this.plugin.trans.llmProvider} LLM Model Name`)
       .addText(text => text
-        .setPlaceholder('你申请到的Model Name')
+        .setPlaceholder('qwen-turbo')
         .setValue(this.plugin.settings.llmSettings.modelName)
         .onChange(async (value) => {
           this.plugin.settings.llmSettings.modelName = value;
           await this.plugin.saveSettings();
         }));
     
-    containerEl.createEl('h2', {text: '文字识别'});
+    containerEl.createEl('h2', {text: this.plugin.trans.imageToText});
     new Setting(containerEl)
       .setName('APP ID')
-      .setDesc('百度文字识别 APP ID')
+      .setDesc(`${this.plugin.trans.ocrProvider} APP ID`)
       .addText(text => text
         .setPlaceholder('你申请到的APP ID')
         .setValue(this.plugin.settings.ocrSettings.appID)
@@ -132,7 +141,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Key')
-      .setDesc('百度文字识别 API Key')
+      .setDesc(`${this.plugin.trans.ocrProvider} API Key`)
       .addText(text => text
         .setPlaceholder('你申请到的API Key')
         .setValue(this.plugin.settings.ocrSettings.apiKey)
@@ -142,7 +151,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Secret')
-      .setDesc('百度文字识别 API Secret')
+      .setDesc(`${this.plugin.trans.ocrProvider} API Secret`)
       .addText(text => text
         .setPlaceholder('你申请到的API Secret')
         .setValue(this.plugin.settings.ocrSettings.apiSecret)
@@ -175,9 +184,9 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     */
-    containerEl.createEl('h2', {text: '语音合成与翻译'});
+    containerEl.createEl('h2', {text: this.plugin.trans.speechSetting});
     new Setting(containerEl)
-      .setName('语音服务Key')
+      .setName(this.plugin.trans.speechSubscriptionKey)
       .setDesc('Microsoft Azure Speech Subscription Key')
       .addText(text => text
         .setPlaceholder('Your Azure Speech Subscription Key')
@@ -187,11 +196,11 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     new Setting(containerEl)
-      .setName('语音风格')
-      .setDesc('生成语音的风格')
+      .setName(this.plugin.trans.speechVoiceType)
+      .setDesc('Speech Voice Type')
       .addDropdown((dropdown) => {
-        dropdown.addOption('en-GB-SoniaNeural', '英式');
-        dropdown.addOption('en-US-AmandaMultilingualNeural', '美式');
+        dropdown.addOption('en-GB-SoniaNeural', this.plugin.trans.speechVoiceGB);
+        dropdown.addOption('en-US-AmandaMultilingualNeural', this.plugin.trans.speechVoiceUS);
         dropdown.setValue(this.plugin.settings.speechSettings.speechVoice);
         dropdown.onChange((option) => {
             this.plugin.settings.speechSettings.speechVoice = option;
@@ -199,7 +208,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         });
       });
     new Setting(containerEl)
-    .setName('翻译服务Key')
+    .setName(this.plugin.trans.mtSubscriptionKey)
     .setDesc('Microsoft Azure Translator Subscription Key')
     .addText(text => text
       .setPlaceholder('Your Azure Translator Subscription Key')

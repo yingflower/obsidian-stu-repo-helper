@@ -7,7 +7,7 @@ export const GENERATE_SIMILAR_TOPIC_TEMPLATE = `
 
 {GRADE}知识水平的出题要求如下：
 1. 题目不能过于复杂，要符合{GRADE}学生的认知能力。
-2. 应涵盖{GRADE}课程中的常见知识点，如四则运算、简单几何、基础语文知识等。
+2. 应涵盖{GRADE}课程中的常见知识点。
 
 在出题时，请遵循以下指导：
 1. 对于每一道扩展题目，尽量从不同的知识点角度出发，但要基于原始题目相关的知识范畴。
@@ -16,8 +16,8 @@ export const GENERATE_SIMILAR_TOPIC_TEMPLATE = `
 
 请按照下面的格式给出回答：
 根据上述题目生成的扩展题目如下：
-1. 题目1
-2. 题目2
+题目1
+题目2
 ...
 `;
 
@@ -35,6 +35,7 @@ export const GENERATE_LEARNING_POINTS_TEMPLATE = `
 请按照下面的格式给出回答：
 本题目主要涉及到的知识点如下：
 你的答案
+...
 `;
 
 export const EXPLAIN_KNOWLEDGE_POINT_TEMPLATE = `
