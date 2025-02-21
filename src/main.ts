@@ -49,29 +49,38 @@ export default class StudentRepoPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file) => {
-        var isImage = isFileImage(file.path)
+        const isImage = isFileImage(file.path)
         if (isImage) {
-          if (isImage) {
-            menu.addItem((item) => {
-              item.setTitle(this.trans.createNodeFromImageMenu)
-              .setIcon('document')
-              .onClick(async() => {
-                var files = [file]
-                await createImagesNote(files)
-              });
-            })
-          }
+          menu.addItem((item) => {
+            item.setTitle(this.trans.createNodeFromImageMenu)
+            .setIcon('document')
+            .onClick(async() => {
+              var files = [file]
+              await createImagesNote(files)
+            });
+          })
+          menu.addItem((item) => {
+            item.setTitle(this.trans.imageToTextMenu)
+            .setIcon('document')
+            .onClick(async() => {
+              const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+              if (view) {
+                await this.handleOcrRequest(file.path, view.editor);
+              }
+            });
+          })
         }
 			})
 		);
   }
 
-  async handleOcrRequest(imageFile: string, editor: Editor): Promise<void> {
+  async handleOcrRequest(imageFile: string, editor: Editor, line: number = -1): Promise<void> {
     console.log('文字识别:', imageFile);
     const file = await this.getLinkedFile(imageFile);
     if (!file) {
       new Notice(`Image file not exist: ${imageFile}`);
     } else {
+      new Notice(`将<${imageFile}>转成文字`);
       var imageBuffer: ArrayBuffer =  await this.app.vault.adapter.readBinary(file.path)
       // 使用百度云提供的文字识别服务
       const isUpdate = await checkAccessToken(this.settings.ocrSettings);
@@ -81,9 +90,27 @@ export default class StudentRepoPlugin extends Plugin {
       const text = await imageToTextHttp(imageBuffer, this.settings.ocrSettings)
       // 使用微软提供的ocr服务
       //const text = await imageToText(imageBuffer, "tcI94DxwkS5q7eX9QjKsjtWsUNgu60m8BjpTmnVcx04nQdau7QdXJQQJ99BBAC3pKaRXJ3w3AAAFACOG2RC2")
-      const corsor = editor.getCursor();
-      const nextLinePos = {line: corsor.line + 1, ch: 0};
-      editor.replaceRange(text, nextLinePos);
+      if (line < 0) {
+        line = editor.getCursor().line + 1;
+      }
+      const nextLinePos = {line: line, ch: 0};
+      editor.replaceRange(`${text}\n`,nextLinePos);
+    }
+  }
+
+  async handleImagesToTextRequest(mdFile: TFile, editor: Editor): Promise<void> {
+    // Parse md file, get all image links
+    const mdContent = await this.app.vault.read(mdFile);
+    const lines = mdContent.split('\n');
+    const imageRegex = /!\[\[(.*\.(jpg|jpeg|png|bmp))\]\]/;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i];
+      const match = line.match(imageRegex);
+      if (match) {
+          const imagePath = match[1];
+          console.log(`Image match: ${imagePath} in line ${i}`)
+          await this.handleOcrRequest(imagePath, editor, i + 1);
+      }
     }
   }
 
@@ -91,9 +118,9 @@ export default class StudentRepoPlugin extends Plugin {
     const { full_path, rel_path } = await this.getAudioFilePath(mdFile, this.settings)
     
     console.time('textToSpeech')
-    let audio_buffer = await textToSpeechHttp(text, this.settings.azureSettings.speechSubscriptionKey, this.settings.speechSettings.speechVoice)
+    let audio_buffer = await textToSpeechHttp(text, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
     await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
-    //await textToSpeech(text, full_path, this.settings.azureSettings.speechSubscriptionKey, this.settings.speechSettings.speechVoice)
+    //await textToSpeech(text, full_path, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
     console.timeEnd('textToSpeech')
     console.log(`Audio saved to ${rel_path}`);
     
@@ -104,7 +131,7 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleTranslateTextRequest(text: string, editor: Editor): Promise<void> {
-    let translatedText = await translateText(text, 'zh-Hans', this.settings.azureSettings.mtSubscriptionKey)
+    let translatedText = await translateText(text, this.settings.mtSettings.language, this.settings.mtSettings.subscriptionKey)
     const endOffset = editor.getCursor('to');
     editor.replaceRange(`(${translatedText})`, endOffset);
   }
@@ -135,6 +162,7 @@ export default class StudentRepoPlugin extends Plugin {
         console.log('selection:', selection);
         const imageRegex = /!?\[?\[?(.*\.(jpg|jpeg|png|bmp))\]?\]?/;
         const match = selection.match(imageRegex);
+        /**
         if (match) {
           menu.addItem((item) => {
             item.setTitle(this.trans.imageToTextMenu)
@@ -145,6 +173,8 @@ export default class StudentRepoPlugin extends Plugin {
             });
           })
         } else {
+        */
+        if (!match) {
           // Create Audio
           menu.addItem(item => {
             item
@@ -232,12 +262,15 @@ export default class StudentRepoPlugin extends Plugin {
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
         const imageRegex = /!?\[?\[?(.*\.(jpg|jpeg|png|bmp))\]?\]?/;
+        
         const match = selection.match(imageRegex);
         if (match) {
           let imageFile = match[1]
           this.handleOcrRequest(imageFile, editor);
         } else {
-          new Notice(`图片匹配失败: ${selection}`);
+          if (view) {
+            this.handleImagesToTextRequest(view.file, editor);
+          }
         }
       }
     });
@@ -280,6 +313,10 @@ export default class StudentRepoPlugin extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
+}
+
+function isFileMarkdown(path: string): boolean {
+  return path.endsWith('.md')
 }
 
 function isFileImage(path: string): boolean {

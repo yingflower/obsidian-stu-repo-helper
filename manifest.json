@@ -1,12 +1,12 @@
 {
 	"id": "stu-repo-helper",
 	"name": "Student Repo",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Generate markdown file automaticly.",
+	"description": "Manage student repositories.",
 	"author": "Feirong.zfr",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/yingflower",
+	"fundingUrl": "https://github.com/yingflower",
 	"isDesktopOnly": false,
 	"permissions": {
 		"filesystem": ["read", "write"]

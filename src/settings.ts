@@ -22,22 +22,23 @@ export interface LLMSettings {
   modelName: string;
 }
 
-export interface AzureSettings {
-  speechSubscriptionKey: string;
-  mtSubscriptionKey: string;
+export interface TranslationSettings {
+  subscriptionKey: string;
+  language: string;
 }
 
 export interface SpeechSettings {
+  subscriptionKey: string;
+  speechVoice: string
   speechLanguage: string,
   speechOutputPath: string,
-  speechVoice: string
 }
 export interface StudentRepoSettings {
   stuSettings: StudentSettings;
   speechSettings: SpeechSettings;
   ocrSettings: OcrSettings;
   llmSettings: LLMSettings;
-  azureSettings: AzureSettings;
+  mtSettings: TranslationSettings;
 }
 
 
@@ -47,6 +48,7 @@ export const DEFAULT_SETTINGS: StudentRepoSettings = {
     grade: '小学四年级'
   },
   speechSettings: {
+    subscriptionKey: '',
     speechLanguage: 'en',
     speechVoice: 'en-GB-SoniaNeural',
     speechOutputPath: '_audios',
@@ -65,9 +67,9 @@ export const DEFAULT_SETTINGS: StudentRepoSettings = {
     apiKey: '',
     modelName: ''
   },
-  azureSettings: {
-    speechSubscriptionKey: '',
-    mtSubscriptionKey: ''
+  mtSettings: {
+    language: 'zh-Hans',
+    subscriptionKey: ''
   }
 }
 
@@ -190,9 +192,9 @@ export class StudentRepoSettingTab extends PluginSettingTab {
       .setDesc('Microsoft Azure Speech Subscription Key')
       .addText(text => text
         .setPlaceholder('Your Azure Speech Subscription Key')
-        .setValue(this.plugin.settings.azureSettings.speechSubscriptionKey)
+        .setValue(this.plugin.settings.speechSettings.subscriptionKey)
         .onChange(async (value) => {
-          this.plugin.settings.azureSettings.speechSubscriptionKey = value;
+          this.plugin.settings.speechSettings.subscriptionKey = value;
           await this.plugin.saveSettings();
         }));
     new Setting(containerEl)
@@ -212,10 +214,22 @@ export class StudentRepoSettingTab extends PluginSettingTab {
     .setDesc('Microsoft Azure Translator Subscription Key')
     .addText(text => text
       .setPlaceholder('Your Azure Translator Subscription Key')
-      .setValue(this.plugin.settings.azureSettings.mtSubscriptionKey)
+      .setValue(this.plugin.settings.mtSettings.subscriptionKey)
       .onChange(async (value) => {
-        this.plugin.settings.azureSettings.mtSubscriptionKey = value;
+        this.plugin.settings.mtSettings.subscriptionKey = value;
         await this.plugin.saveSettings();
       }));
-    };
+    new Setting(containerEl)
+    .setName('翻译语言')
+    .setDesc('翻译的目标语言')
+    .addDropdown((dropdown) => {
+      dropdown.addOption('en', 'English');
+      dropdown.addOption('zh-Hans', '普通话');
+      dropdown.setValue(this.plugin.settings.mtSettings.language);
+      dropdown.onChange((option) => {
+          this.plugin.settings.mtSettings.language = option;
+          this.plugin.saveSettings();
+      });
+    });
+  };
 }
