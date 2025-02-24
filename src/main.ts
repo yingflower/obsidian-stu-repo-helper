@@ -1,4 +1,4 @@
-import { App, Notice, Plugin, TAbstractFile, TFile, Platform, Editor, MarkdownView, normalizePath} from 'obsidian';
+import { App, Notice, Plugin, TAbstractFile, TFile, Platform, Editor, MarkdownView, normalizePath, Modal } from 'obsidian';
 import { StudentRepoSettings, DEFAULT_SETTINGS } from './settings';
 import { StudentRepoSettingTab } from './settings';
 import { textToSpeechHttp, translateText, imageToText } from "./ms_azure";
@@ -7,6 +7,7 @@ import { GENERATE_SIMILAR_TOPIC_TEMPLATE, GENERATE_LEARNING_POINTS_TEMPLATE } fr
 import { sendLLMRequest } from './llm'
 import en from './locales/en'
 import zh from './locales/zh-CN'
+
 
 export default class StudentRepoPlugin extends Plugin {
   settings: StudentRepoSettings;
@@ -116,6 +117,7 @@ export default class StudentRepoPlugin extends Plugin {
 
   async handleTextToSpeechRequest(text: string, mdFile: TFile, editor: Editor): Promise<void> {
     const { full_path, rel_path } = await this.getAudioFilePath(mdFile, this.settings)
+    text = removeMarkdownTags(text);
     
     console.time('textToSpeech')
     let audio_buffer = await textToSpeechHttp(text, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
@@ -396,4 +398,24 @@ async function createImagesNote(files: TFile[]) {
 
 function addQuoteToText(text: string, note: string): string {
   return `\n> [!NOTE] ${note}\n` + text.split('\n').map(line => `> ${line}`).join('\n')
+}
+
+function removeMarkdownTags(text: string): string {
+  // 去除标题标记
+  text = text.replace(/^(#+)\s/gm, '');
+  // 去除加粗、斜体等标记
+  text = text.replace(/(\*\*|__|_|\*)/g, '');
+  // 去除列表标记
+  text = text.replace(/^([-*+]\s|\d+\.\s)/gm, '');
+  // 去除代码块标记
+  text = text.replace(/```[\s\S]*?```/g, '');
+  // 去除行内代码标记
+  text = text.replace(/`([^`]*)`/g, '$1');
+  // 去除链接和图片标记
+  text = text.replace(/!?\[[^\]]*\]\([^)]*\)/g, '');
+  // 去除水平线
+  text = text.replace(/^---+$/gm, '');
+  // 去除 HTML 标签
+  text = text.replace(/<[^>]*>/g, '');
+  return text;
 }
