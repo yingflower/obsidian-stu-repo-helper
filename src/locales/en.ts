@@ -1,7 +1,7 @@
 
 const pluginName = "Student Repo";
 const similarTopics = "Similar Topics";
-const learningPoints = "Learning Points";
+const learningPoints = "Knowledge Points";
 const imageToText = "Image to Text";
 const textToSpeech = "Text to Speech";
 const translateText = "Translate";
@@ -26,11 +26,19 @@ export default {
   ocrProvider: "Baidu Cloud",
   ttsProvider: "Microsoft Azure",
   studentGrade: `Student Grade`,
+  localLanguage: 'Local Language',
   llmSetting: `LLM Settings`,
   speechSetting: 'Speech and Translation',
   speechSubscriptionKey: 'Speech Subscription Key',
   speechVoiceType: 'Speech Voice Type',
   speechVoiceGB: 'Great Britain',
+  speechVoiceCN: 'Mandarin',
   speechVoiceUS: 'USA',
   mtSubscriptionKey: 'Translation Subscription Key',
+  // For status bar
+  errorHappen: "Error Happened",
+  imageToTexting: "Image to text...",
+  textToSpeeching : "Text to speech...",
+  translating: "Translating...",
+  thinking: "Thinking...",
 };

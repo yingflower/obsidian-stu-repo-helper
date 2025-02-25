@@ -1,24 +1,34 @@
-import { App, Notice, Plugin, TAbstractFile, TFile, Platform, Editor, MarkdownView, normalizePath, Modal } from 'obsidian';
+import { App, Notice, Plugin, TAbstractFile, TFile, Platform, Editor, MarkdownView, normalizePath } from 'obsidian';
 import { StudentRepoSettings, DEFAULT_SETTINGS } from './settings';
 import { StudentRepoSettingTab } from './settings';
 import { textToSpeechHttp, translateText, imageToText } from "./ms_azure";
 import { checkAccessToken, imageToTextHttp } from "./baidu_ai";
-import { GENERATE_SIMILAR_TOPIC_TEMPLATE, GENERATE_LEARNING_POINTS_TEMPLATE } from './prompt'
+import { 
+  GENERATE_SIMILAR_TOPIC_TEMPLATE,
+  GENERATE_LEARNING_POINTS_TEMPLATE,
+  GENERATE_LEARNING_POINTS_TEMPLATE_EN,
+  GENERATE_SIMILAR_TOPIC_TEMPLATE_EN
+} from './prompt'
+
 import { sendLLMRequest } from './llm'
 import en from './locales/en'
 import zh from './locales/zh-CN'
 
 
+
 export default class StudentRepoPlugin extends Plugin {
   settings: StudentRepoSettings;
   trans: any;
+  isLangZh: boolean;;
 
   async onload() {
     const locale = window.localStorage.getItem('language')
-    this.trans = locale?.startsWith('zh') ? zh : en;
+    this.isLangZh = locale?.startsWith('zh') ?? false;
+    this.trans = this.isLangZh ? zh : en;
 
     this.addSettingTab(new StudentRepoSettingTab(this.app, this));
     await this.loadSettings();
+
     console.log('Student Repository Helper loaded');
     console.log('Settings:', this.settings);
     console.log('Platform isDesktop:', Platform.isDesktop);
@@ -76,30 +86,48 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleOcrRequest(imageFile: string, editor: Editor, line: number = -1): Promise<void> {
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText(this.trans.imageToTexting);
     console.log('文字识别:', imageFile);
-    const file = await this.getLinkedFile(imageFile);
-    if (!file) {
-      new Notice(`Image file not exist: ${imageFile}`);
-    } else {
-      new Notice(`将<${imageFile}>转成文字`);
-      var imageBuffer: ArrayBuffer =  await this.app.vault.adapter.readBinary(file.path)
-      // 使用百度云提供的文字识别服务
-      const isUpdate = await checkAccessToken(this.settings.ocrSettings);
-      if (isUpdate) {
-        await this.saveSettings();
+    try {
+      const file = await this.getLinkedFile(imageFile);
+      if (!file) {
+        new Notice(`Image file not exist: ${imageFile}`);
+      } else {
+        if (this.isLangZh) {
+          new Notice(`将<${imageFile}>转成文字`);
+        } else {
+          new Notice(`Convert <${imageFile}> to text`);
+        }
+        var imageBuffer: ArrayBuffer =  await this.app.vault.adapter.readBinary(file.path)
+        // 使用百度云提供的文字识别服务
+        const isUpdate = await checkAccessToken(this.settings.ocrSettings);
+        if (isUpdate) {
+          await this.saveSettings();
+        }
+        const text = await imageToTextHttp(imageBuffer, this.settings.ocrSettings)
+        // 使用微软提供的ocr服务
+        //const text = await imageToText(imageBuffer, "tcI94DxwkS5q7eX9QjKsjtWsUNgu60m8BjpTmnVcx04nQdau7QdXJQQJ99BBAC3pKaRXJ3w3AAAFACOG2RC2")
+        if (line < 0) {
+          line = editor.getCursor().line + 1;
+        }
+        const nextLinePos = {line: line, ch: 0};
+        editor.replaceRange(`${text}\n`,nextLinePos);
+        editor.setCursor(nextLinePos);
+        editor.scrollIntoView({from: {line, ch: 0}, to: {line: line + 20, ch: 0}});
       }
-      const text = await imageToTextHttp(imageBuffer, this.settings.ocrSettings)
-      // 使用微软提供的ocr服务
-      //const text = await imageToText(imageBuffer, "tcI94DxwkS5q7eX9QjKsjtWsUNgu60m8BjpTmnVcx04nQdau7QdXJQQJ99BBAC3pKaRXJ3w3AAAFACOG2RC2")
-      if (line < 0) {
-        line = editor.getCursor().line + 1;
-      }
-      const nextLinePos = {line: line, ch: 0};
-      editor.replaceRange(`${text}\n`,nextLinePos);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
     }
   }
 
   async handleImagesToTextRequest(mdFile: TFile, editor: Editor): Promise<void> {
+
     // Parse md file, get all image links
     const mdContent = await this.app.vault.read(mdFile);
     const lines = mdContent.split('\n');
@@ -116,42 +144,85 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleTextToSpeechRequest(text: string, mdFile: TFile, editor: Editor): Promise<void> {
-    const { full_path, rel_path } = await this.getAudioFilePath(mdFile, this.settings)
-    text = removeMarkdownTags(text);
-    
-    console.time('textToSpeech')
-    let audio_buffer = await textToSpeechHttp(text, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
-    await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
-    //await textToSpeech(text, full_path, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
-    console.timeEnd('textToSpeech')
-    console.log(`Audio saved to ${rel_path}`);
-    
-    let md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
-    const startOffset = editor.getCursor('from');
-    const nextLinePos = {line: startOffset.line, ch: 0};
-    editor.replaceRange(md_text, nextLinePos);
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText(this.trans.textToSpeeching);
+    try {
+      const { full_path, rel_path } = await this.getAudioFilePath(mdFile, this.settings)
+      text = removeMarkdownTags(text);
+      
+      console.time('textToSpeech')
+      let audio_buffer = await textToSpeechHttp(text, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
+      await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
+      //await textToSpeech(text, full_path, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
+      console.timeEnd('textToSpeech')
+      console.log(`Audio saved to ${rel_path}`);
+      
+      let md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
+      const startOffset = editor.getCursor('from');
+      const nextLinePos = {line: startOffset.line, ch: 0};
+      editor.replaceRange(md_text, nextLinePos);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
   }
 
   async handleTranslateTextRequest(text: string, editor: Editor): Promise<void> {
-    let translatedText = await translateText(text, this.settings.mtSettings.language, this.settings.mtSettings.subscriptionKey)
+    let translatedText = await translateText(text, this.settings.stuSettings.localLanguage, this.settings.mtSettings.subscriptionKey)
     const endOffset = editor.getCursor('to');
     editor.replaceRange(`(${translatedText})`, endOffset);
   }
 
   async handleGenSimilarTopicRequest(topic: string, editor: Editor): Promise<void> {
-    const prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', topic);
-    const result = await sendLLMRequest(prompt, this.settings.llmSettings);
-    const endOffset = editor.getCursor('to');
-    const nextLinePos = {line: endOffset.line + 1, ch: 0};
-    editor.replaceRange(`${addQuoteToText(result, this.trans.similarTopics)}\n\n`, nextLinePos);
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText("思考中...");
+    try {
+      var prompt = '';
+      if (this.settings.stuSettings.localLanguage === 'zh-Hans') {
+        prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', topic).replace('{LANGUAGE}', '中文');
+      } else {
+        prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE_EN.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', topic).replace('{LANGUAGE}', 'English');
+      }
+      const result = await sendLLMRequest(prompt, this.settings.llmSettings);
+      const endOffset = editor.getCursor('to');
+      const nextLinePos = {line: endOffset.line + 1, ch: 0};
+      editor.replaceRange(`${addQuoteToText(result, this.trans.similarTopics)}\n\n`, nextLinePos);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
   }
 
   async handleGenLearningPointRequest(topic: string, editor: Editor): Promise<void> {
-    const prompt = GENERATE_LEARNING_POINTS_TEMPLATE.replace('{TOPIC}', topic);
-    const result = await sendLLMRequest(prompt, this.settings.llmSettings);
-    const endOffset = editor.getCursor('to');
-    const nextLinePos = {line: endOffset.line + 1, ch: 0};
-    editor.replaceRange(`${addQuoteToText(result, this.trans.learningPoints)}\n\n`, nextLinePos);
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText(this.trans.thinking);
+    try {
+      var prompt = '';
+      if (this.settings.stuSettings.localLanguage === 'zh-Hans') {
+        prompt = GENERATE_LEARNING_POINTS_TEMPLATE.replace('{TOPIC}', topic).replace('{LANGUAGE}', '中文');
+      } else {
+        prompt = GENERATE_LEARNING_POINTS_TEMPLATE_EN.replace('{TOPIC}', topic).replace('{LANGUAGE}', 'English');
+      }
+      const result = await sendLLMRequest(prompt, this.settings.llmSettings);
+      const endOffset = editor.getCursor('to');
+      const nextLinePos = {line: endOffset.line + 1, ch: 0};
+      editor.replaceRange(`${addQuoteToText(result, this.trans.learningPoints)}\n\n`, nextLinePos);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
   }
 
   registerEditorMenu(): void {
@@ -290,17 +361,31 @@ export default class StudentRepoPlugin extends Plugin {
     // Create output audio dir
     const audio_path = normalizePath(`${tfile.parent.path}/${settings.speechSettings.speechOutputPath}`)
     //console.log(`audio_path: ${audio_path}`)
-    await this.app.vault.adapter.mkdir(audio_path)
+    if (!await this.app.vault.adapter.exists(audio_path)) {
+      await this.app.vault.adapter.mkdir(audio_path)
+    }
     // Get output mp3 file path
     var audio_full_path = this.app.vault.adapter.getFullPath(audio_path)
     //console.log(`audio_full_path: ${audio_full_path}`)
-    const output_fname = tfile.basename + '.mp3';
-    //console.log(`output_fname: ${output_fname}`)
+    var full_path = '';
+    var rel_path = '';
+    var i = 0;
+    do {
+      var output_fname = ''
+      if (i > 0) {
+        output_fname = `${tfile.basename}_${i}.mp3`;
+      } else {
+        output_fname = `${tfile.basename}.mp3`;
+      }
+      
+      //console.log(`output_fname: ${output_fname}`)
 
-    const full_path = normalizePath(`${audio_full_path}/${output_fname}`);
-    //console.log(`full_path: ${full_path}`)
-    const rel_path = normalizePath(`${audio_path}/${output_fname}`);
-    //console.log(`rel_path: ${rel_path}`)
+      full_path = normalizePath(`${audio_full_path}/${output_fname}`);
+      //console.log(`full_path: ${full_path}`)
+      rel_path = normalizePath(`${audio_path}/${output_fname}`);
+      //console.log(`rel_path: ${rel_path}`)
+      i++;
+    } while (await this.app.vault.adapter.exists(rel_path));
     
     return {full_path, rel_path};
   }

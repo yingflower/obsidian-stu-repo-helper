@@ -25,11 +25,20 @@ export default {
   ocrProvider: "百度云",
   ttsProvider: "微软Azure",
   studentGrade: `学生年级`,
+  localLanguage: '本地语言',
   llmSetting: `大模型配置`,
   speechSetting: '语音合成与翻译',
   speechSubscriptionKey: '语音服务Key',
   speechVoiceType: '语音风格',
   speechVoiceGB: '英式',
   speechVoiceUS: '美式',
+  speechVoiceCN: '普通话',
   mtSubscriptionKey: '翻译服务Key',
+
+  // For status bar
+  errorHappen: "出错了",
+  imageToTexting: "文字识别中...",
+  textToSpeeching : "语音合成中...",
+  translating: "翻译中...",
+  thinking: "思考中...",
 };

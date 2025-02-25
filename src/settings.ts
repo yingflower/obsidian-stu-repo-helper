@@ -3,6 +3,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 
 export interface StudentSettings {
   grade: string;
+  localLanguage: string;
 }
 
 export interface AccessToken {
@@ -24,7 +25,6 @@ export interface LLMSettings {
 
 export interface TranslationSettings {
   subscriptionKey: string;
-  language: string;
 }
 
 export interface SpeechSettings {
@@ -45,7 +45,8 @@ export interface StudentRepoSettings {
 
 export const DEFAULT_SETTINGS: StudentRepoSettings = {
   stuSettings: {
-    grade: '小学四年级'
+    grade: '小学四年级',
+    localLanguage: 'zh-Hans',
   },
   speechSettings: {
     subscriptionKey: '',
@@ -68,7 +69,6 @@ export const DEFAULT_SETTINGS: StudentRepoSettings = {
     modelName: ''
   },
   mtSettings: {
-    language: 'zh-Hans',
     subscriptionKey: ''
   }
 }
@@ -96,7 +96,18 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           this.plugin.settings.stuSettings.grade = value;
           await this.plugin.saveSettings();
         }));
-
+    new Setting(containerEl)
+    .setName(this.plugin.trans.localLanguage)
+    .setDesc(this.plugin.trans.localLanguage)
+    .addDropdown((dropdown) => {
+      dropdown.addOption('en', 'English');
+      dropdown.addOption('zh-Hans', '普通话');
+      dropdown.setValue(this.plugin.settings.stuSettings.localLanguage);
+      dropdown.onChange((option) => {
+          this.plugin.settings.stuSettings.localLanguage = option;
+          this.plugin.saveSettings();
+      });
+    });
     containerEl.createEl('h2', {text: this.plugin.trans.llmSetting});
     
     new Setting(containerEl)
@@ -203,6 +214,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
       .addDropdown((dropdown) => {
         dropdown.addOption('en-GB-SoniaNeural', this.plugin.trans.speechVoiceGB);
         dropdown.addOption('en-US-AmandaMultilingualNeural', this.plugin.trans.speechVoiceUS);
+        dropdown.addOption('zh-CN-XiaoxiaoNeural', this.plugin.trans.speechVoiceCN);
         dropdown.setValue(this.plugin.settings.speechSettings.speechVoice);
         dropdown.onChange((option) => {
             this.plugin.settings.speechSettings.speechVoice = option;
@@ -219,17 +231,5 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         this.plugin.settings.mtSettings.subscriptionKey = value;
         await this.plugin.saveSettings();
       }));
-    new Setting(containerEl)
-    .setName('翻译语言')
-    .setDesc('翻译的目标语言')
-    .addDropdown((dropdown) => {
-      dropdown.addOption('en', 'English');
-      dropdown.addOption('zh-Hans', '普通话');
-      dropdown.setValue(this.plugin.settings.mtSettings.language);
-      dropdown.onChange((option) => {
-          this.plugin.settings.mtSettings.language = option;
-          this.plugin.saveSettings();
-      });
-    });
   };
 }
