@@ -4,14 +4,14 @@ import { LLMSettings } from './settings'
 // 火山引擎大模型配置
 const doubaoSettings: LLMSettings = {
   apiBase: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-  apiKey: '383bc7ff-89ea-4eef-8115-fa9663d2ab15',
+  apiKey: '',
   modelName: 'ep-20241101181437-tzh5b'
 };
 
 // 千问大模型配置
 const qwenSettings: LLMSettings = {
   apiBase: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-  apiKey: 'sk-f7eaec40379b4d9bb576cde4847689fc',
+  apiKey: '',
   modelName: 'qwen-turbo'
 };
 

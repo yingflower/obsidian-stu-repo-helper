@@ -2,15 +2,15 @@ import { requestUrl, Notice } from 'obsidian';
 const serviceRegion = "eastasia";
 
 // 配置 Azure 语音服务
-const speechSubscriptionKey = "EW1zA3mbSjj1i7qfkpUN6HXaStcuUaXnGlgDEFJCFnYQlcXLza6tJQQJ99BBAC3pKaRXJ3w3AAAYACOGpX0K";
+const speechSubscriptionKey = "";
 const speechApiUrl = `https://${serviceRegion}.tts.speech.microsoft.com/cognitiveservices/v1`;
 
 //配置 Azure 翻译服务
-const mtSubscriptionKey = "C6w3ydJgZ58HzmKYCKb4z5DSoRCu9JtOlfR8mY7Q0eybcdkLnF6BJQQJ99BBAC3pKaRXJ3w3AAAbACOGPusR";
+const mtSubscriptionKey = "";
 const mtEndpoint = "https://api.cognitive.microsofttranslator.com/";
 
 // 配置 Azure 文字识别服务
-const visionSubscriptionKey = "tcI94DxwkS5q7eX9QjKsjtWsUNgu60m8BjpTmnVcx04nQdau7QdXJQQJ99BBAC3pKaRXJ3w3AAAFACOG2RC2";
+const visionSubscriptionKey = "";
 //const visionEndpoint = "https://eastasia.api.cognitive.microsoft.com";
 const visionApiUrl = `https://${serviceRegion}.api.cognitive.microsoft.com/vision/v3.2/ocr`;
 
