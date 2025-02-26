@@ -70,6 +70,32 @@ The main knowledge points involved in this question are as follows:
 ...
 `;
 
+export const GENERATE_WORD_PHONETICS_TEMPLATE = `
+你的任务是按照要求为给定的词语标注读音：
+{WORD}
+
+在生成音标时,请遵循以下指南:
+1. 如果是英语单词，请使用国际音标符号。
+2. 如果是中文词语，请使用拼音。
+3. 直接给出读音标注，不要多余的话。
+`;
+
+export const SYNTAX_ANALYSIS_TEMPLATE = `
+你的任务是按照要求对给定的短文或句子进行语法分析：
+{TEXT}
+
+在进行语法分析时，请遵循以下指南：
+1. 识别句子中的各个语法成分，如主语、谓语、宾语、定语、状语、补语等。
+2. 指出句子的类型，如简单句、复合句、并列句等。
+3. 检查句子是否存在语法错误，如主谓不一致、时态错误、用词不当等，如果没有语法错误该部分不用包含在回答中。
+4. 如果有多个句子，请分别对每个句子进行分析。
+5. 请直接给出分析结果。
+
+请按照下面的格式给出回答：
+语法分析结果：
+...
+`;
+
 export const EXPLAIN_KNOWLEDGE_POINT_TEMPLATE = `
 你的任务是为学生解释某一知识点。请仔细阅读以下知识点内容，并按照指示进行解释：
 {TOPIC}

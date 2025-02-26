@@ -5,6 +5,8 @@ const learningPoints = "Knowledge Points";
 const imageToText = "Image to Text";
 const textToSpeech = "Text to Speech";
 const translateText = "Translate";
+const addWordBank = "Add to Word Bank";
+const syntaxAnalysis = "Syntax Analysis";
 
 export default {
   pluginName: `${pluginName}`,
@@ -13,9 +15,13 @@ export default {
   imageToText: `${imageToText}`,
   textToSpeech: `${textToSpeech}`,
   translateText: `${translateText}`,
+  addWordBank: `${addWordBank}`,
+  syntaxAnalysis: `${syntaxAnalysis}`,
   imageToTextMenu: `${pluginName}: ${imageToText}`,
   textToSpeechMenu: `${pluginName}: ${textToSpeech}`,
   translateTextMenu: `${pluginName}: ${translateText}`,
+  addWordBankMenu: `${pluginName}: ${addWordBank}`,
+  syntaxAnalysisMenu: `${pluginName}: ${syntaxAnalysis}`,
   genSimilarTopicsMenu: `${pluginName}: ${similarTopics}`,
   genLearningPointsMenu: `${pluginName}: ${learningPoints}`,
   createNodeFromImagesMenu: `${pluginName}: Create note from images`,
@@ -28,7 +34,8 @@ export default {
   studentGrade: `Student Grade`,
   localLanguage: 'Local Language',
   llmSetting: `LLM Settings`,
-  speechSetting: 'Speech and Translation',
+  ocrSetting: 'OCR and Translation',
+  speechSetting: 'Speech Synthesis',
   speechSubscriptionKey: 'Speech Subscription Key',
   speechVoiceType: 'Speech Voice Type',
   speechVoiceGB: 'Great Britain',

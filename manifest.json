@@ -1,14 +1,16 @@
 {
 	"id": "stu-repo-helper",
 	"name": "Student Repo",
-	"version": "0.0.1",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Manage student repositories.",
 	"author": "Feirong.zfr",
 	"authorUrl": "https://github.com/yingflower",
-	"fundingUrl": "https://github.com/yingflower",
 	"isDesktopOnly": false,
 	"permissions": {
-		"filesystem": ["read", "write"]
+		"filesystem": [
+			"read",
+			"write"
+		]
 	}
 }

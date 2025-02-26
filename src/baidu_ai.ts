@@ -83,8 +83,42 @@ export async function imageToTextHttp(imageBuffer: ArrayBuffer, ocrSettings: Ocr
       text += '\n';
     });
   }
-  console.log('图片转文字段落结果:', text);
+  //console.log('图片转文字段落结果:', text);
   return text;
+}
+
+export async function translateTextHttp(text: string, to_lang: string, ocrSettings: OcrSettings): Promise<string> {
+  const url = `https://aip.baidubce.com/rpc/2.0/mt/texttrans/v1?access_token=${ocrSettings.accessToken.token}`
+  const headers = {
+    'Content-Type': 'application/json;charset=utf-8',
+  };
+  const body = {
+    'q': text,
+    'from': 'auto',
+    'to': to_lang,
+  };
+  const requestParam = {
+    url: url,
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(body),
+  };
+  const response = await requestUrl(requestParam);
+
+  if (response.status != 200) {
+    console.error('Translate text error', response)
+    new Notice(`Translate text error: ${response.status}`);
+    return '';
+  }
+  //console.log(response);
+  const result = response.json;
+  let result_text = '';
+  result.result.trans_result.forEach((item: { src: string; dst: string }) => {
+    console.log('原文：', item.src);
+    console.log('译文：', item.dst);
+    result_text += item.dst;
+  });
+  return result_text;
 }
 
 /**

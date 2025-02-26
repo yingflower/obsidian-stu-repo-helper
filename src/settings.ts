@@ -141,7 +141,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     
-    containerEl.createEl('h2', {text: this.plugin.trans.imageToText});
+    containerEl.createEl('h2', {text: this.plugin.trans.ocrSetting});
     new Setting(containerEl)
       .setName('APP ID')
       .setDesc(`${this.plugin.trans.ocrProvider} APP ID`)
@@ -221,6 +221,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
             this.plugin.saveSettings();
         });
       });
+    /**
     new Setting(containerEl)
     .setName(this.plugin.trans.mtSubscriptionKey)
     .setDesc('Microsoft Azure Translator Subscription Key')
@@ -231,5 +232,6 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         this.plugin.settings.mtSettings.subscriptionKey = value;
         await this.plugin.saveSettings();
       }));
+    */
   };
 }

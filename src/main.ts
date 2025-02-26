@@ -1,13 +1,15 @@
 import { App, Notice, Plugin, TAbstractFile, TFile, Platform, Editor, MarkdownView, normalizePath } from 'obsidian';
 import { StudentRepoSettings, DEFAULT_SETTINGS } from './settings';
 import { StudentRepoSettingTab } from './settings';
-import { textToSpeechHttp, translateText, imageToText } from "./ms_azure";
-import { checkAccessToken, imageToTextHttp } from "./baidu_ai";
+import { textToSpeechHttp } from "./ms_azure";
+import { checkAccessToken, imageToTextHttp, translateTextHttp } from "./baidu_ai";
 import { 
   GENERATE_SIMILAR_TOPIC_TEMPLATE,
   GENERATE_LEARNING_POINTS_TEMPLATE,
+  GENERATE_WORD_PHONETICS_TEMPLATE,
   GENERATE_LEARNING_POINTS_TEMPLATE_EN,
-  GENERATE_SIMILAR_TOPIC_TEMPLATE_EN
+  GENERATE_SIMILAR_TOPIC_TEMPLATE_EN,
+  SYNTAX_ANALYSIS_TEMPLATE
 } from './prompt'
 
 import { sendLLMRequest } from './llm'
@@ -172,9 +174,59 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleTranslateTextRequest(text: string, editor: Editor): Promise<void> {
-    let translatedText = await translateText(text, this.settings.stuSettings.localLanguage, this.settings.mtSettings.subscriptionKey)
+    // 使用微软的机器翻译服务
+    //let translatedText = await translateText(text, this.settings.stuSettings.localLanguage, this.settings.mtSettings.subscriptionKey)
+    // 使用百度云提供的机器翻译服务
+    const isUpdate = await checkAccessToken(this.settings.ocrSettings);
+    if (isUpdate) {
+      await this.saveSettings();
+    }
+    let toLang = this.settings.stuSettings.localLanguage === 'zh-Hans' ? 'zh' : 'en';
+    const translatedText = await translateTextHttp(text, toLang, this.settings.ocrSettings)
     const endOffset = editor.getCursor('to');
     editor.replaceRange(`(${translatedText})`, endOffset);
+  }
+
+  async handleAddToWordBankRequest(word: string, editor: Editor): Promise<void> {
+    const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word);
+    var phonetics = await sendLLMRequest(prompt, this.settings.llmSettings);
+    if (!phonetics.startsWith('/')) {
+      phonetics = `/${phonetics}/`;
+    }
+    //const translatedText = await translateText(word, this.settings.stuSettings.localLanguage, this.settings.mtSettings.subscriptionKey)
+    // 使用百度云提供的机器翻译服务
+    const isUpdate = await checkAccessToken(this.settings.ocrSettings);
+    if (isUpdate) {
+      await this.saveSettings();
+    }
+    let toLang = this.settings.stuSettings.localLanguage === 'zh-Hans' ? 'zh' : 'en';
+    const translatedText = await translateTextHttp(word, toLang, this.settings.ocrSettings)
+    const lastLine = editor.lastLine();
+    const lastLineText = editor.getLine(lastLine);
+    if (lastLineText.startsWith(' - ')) {
+      editor.setLine(lastLine + 1, `\n - ${word} ${phonetics} ${translatedText}`);
+    } else {
+      editor.setLine(lastLine + 1, `\n\n Word Bank \n - ${word} ${phonetics}  ${translatedText}`);
+    }
+  }
+
+  async handleSyntaxAnalysisRequest(text: string, editor: Editor): Promise<void> {
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText("思考中...");
+    try {
+      const prompt = SYNTAX_ANALYSIS_TEMPLATE.replace('{TEXT}', text);
+      const result = await sendLLMRequest(prompt, this.settings.llmSettings);
+      const lastLine = editor.lastLine();
+      const displayText = `\n${text}\n\n ${result}`;
+      editor.setLine(lastLine + 1, `${addQuoteToText(displayText, this.trans.syntaxAnalysis)}\n\n`);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
   }
 
   async handleGenSimilarTopicRequest(topic: string, editor: Editor): Promise<void> {
@@ -225,6 +277,25 @@ export default class StudentRepoPlugin extends Plugin {
     }
   }
 
+  async handlePluginUpdate(): Promise<void> {
+    if (await this.app.vault.adapter.exists('plugins')) {
+      const listFiles = await this.app.vault.adapter.list('plugins');
+      for (let i = 0; i < listFiles.folders.length; i++) {
+        const plugin = listFiles.folders[i];
+        const pluginInstallPath = `.obsidian/${plugin}`;
+        await this.app.vault.adapter.rmdir(pluginInstallPath, true);
+        await this.app.vault.adapter.copy(`${plugin}`, pluginInstallPath);
+        console.log(`${plugin} install to ${pluginInstallPath}`);
+      }
+      const statusBarItem = this.addStatusBarItem();
+      statusBarItem.setText('插件更新完成');
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
+
+  }
+
   registerEditorMenu(): void {
     if (!Platform.isDesktop) {
       return;
@@ -235,18 +306,7 @@ export default class StudentRepoPlugin extends Plugin {
         console.log('selection:', selection);
         const imageRegex = /!?\[?\[?(.*\.(jpg|jpeg|png|bmp))\]?\]?/;
         const match = selection.match(imageRegex);
-        /**
-        if (match) {
-          menu.addItem((item) => {
-            item.setTitle(this.trans.imageToTextMenu)
-            .setIcon('document')
-            .onClick(async() => {
-              let imageFile = match[1]
-              this.handleOcrRequest(imageFile, editor);
-            });
-          })
-        } else {
-        */
+
         if (!match) {
           // Create Audio
           menu.addItem(item => {
@@ -268,6 +328,24 @@ export default class StudentRepoPlugin extends Plugin {
               });
           })
 
+          // 加单词库
+          menu.addItem(item => {
+            item
+              .setTitle(this.trans.addWordBankMenu)
+              .setIcon('document')
+              .onClick(async() => {
+                this.handleAddToWordBankRequest(selection, editor);
+              });
+          })
+          // 语法分析
+          menu.addItem(item => {
+            item
+              .setTitle(this.trans.syntaxAnalysisMenu)
+              .setIcon('document')
+              .onClick(async() => {
+                this.handleSyntaxAnalysisRequest(selection, editor);
+              });
+          })
           // 题目扩展
           menu.addItem(item => {
             item
@@ -302,6 +380,26 @@ export default class StudentRepoPlugin extends Plugin {
         const selection = editor.getSelection();
         console.log('selection:', selection);
         this.handleTranslateTextRequest(selection, editor);
+      }
+    });
+    this.addCommand({
+      id: 'word_bank',
+      name: this.trans.addWordBank,
+      icon: "rss",
+      editorCallback: async (editor: Editor, view: MarkdownView) => {
+        const selection = editor.getSelection();
+        console.log('selection:', selection);
+        this.handleAddToWordBankRequest(selection, editor);
+      }
+    });
+    this.addCommand({
+      id: 'syntax_analysis',
+      name: this.trans.syntaxAnalysis,
+      icon: "brain",
+      editorCallback: async (editor: Editor, view: MarkdownView) => {
+        const selection = editor.getSelection();
+        console.log('selection:', selection);
+        this.handleSyntaxAnalysisRequest(selection, editor);
       }
     });
 
@@ -345,6 +443,15 @@ export default class StudentRepoPlugin extends Plugin {
             this.handleImagesToTextRequest(view.file, editor);
           }
         }
+      }
+    });
+
+    this.addCommand({
+      id: 'plugin_update',
+      name: "Plugin Update",
+      icon: "arrow-up",
+      callback: async () => {
+        this.handlePluginUpdate();
       }
     });
   }

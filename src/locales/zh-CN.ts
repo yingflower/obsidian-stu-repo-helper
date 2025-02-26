@@ -4,6 +4,8 @@ const learningPoints = "知识点分析";
 const imageToText = "文字识别";
 const textToSpeech = "文字转语音";
 const translateText = "翻译";
+const addWordBank = "加单词库";
+const syntaxAnalysis = "语法分析";
 
 export default {
   pluginName: `${pluginName}`,
@@ -12,9 +14,13 @@ export default {
   imageToText: `${imageToText}`,
   textToSpeech: `${textToSpeech}`,
   translateText: `${translateText}`,
+  addWordBank: `${addWordBank}`,
+  syntaxAnalysis: `${syntaxAnalysis}`,
   imageToTextMenu: `${pluginName}: ${imageToText}`,
   textToSpeechMenu: `${pluginName}: ${textToSpeech}`,
   translateTextMenu: `${pluginName}: ${translateText}`,
+  addWordBankMenu: `${pluginName}: ${addWordBank}`,
+  syntaxAnalysisMenu: `${pluginName}: ${syntaxAnalysis}`,
   genSimilarTopicsMenu: `${pluginName}: ${similarTopics}`,
   genLearningPointsMenu: `${pluginName}: ${learningPoints}`,
   createNodeFromImagesMenu: `${pluginName}: 从图片生成笔记`,
@@ -27,7 +33,8 @@ export default {
   studentGrade: `学生年级`,
   localLanguage: '本地语言',
   llmSetting: `大模型配置`,
-  speechSetting: '语音合成与翻译',
+  ocrSetting: '文字识别与翻译',
+  speechSetting: '语音合成',
   speechSubscriptionKey: '语音服务Key',
   speechVoiceType: '语音风格',
   speechVoiceGB: '英式',
