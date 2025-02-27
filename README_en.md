@@ -24,6 +24,7 @@ The following are the AI services used in the process of building the knowledge 
 ## How to Use
 ### Configure the Plugin
 Open the plugin settings and enter the account information of your AI service provider. An example is shown in the following figure:
+
 ![Plugin Settings](images/en/settings.png)
 
 ### One-click Conversion of Test Paper Images to Documents
