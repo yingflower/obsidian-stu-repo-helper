@@ -282,18 +282,29 @@ export default class StudentRepoPlugin extends Plugin {
       const listFiles = await this.app.vault.adapter.list('plugins');
       for (let i = 0; i < listFiles.folders.length; i++) {
         const plugin = listFiles.folders[i];
-        const pluginInstallPath = `.obsidian/${plugin}`;
+        const pluginInstallPath = normalizePath(`.obsidian/${plugin}`);
+        if (await this.app.vault.adapter.exists(pluginInstallPath)) {
         await this.app.vault.adapter.rmdir(pluginInstallPath, true);
-        await this.app.vault.adapter.copy(`${plugin}`, pluginInstallPath);
+          await this.app.vault.adapter.mkdir(pluginInstallPath);
+        }
+        const pluginFiles = await this.app.vault.adapter.list(plugin);
+        for (let j = 0; j< pluginFiles.files.length; j++) {
+          const pluginFile = pluginFiles.files[j];
+          let fileName = this.app.vault.getAbstractFileByPath(pluginFile)?.name;
+          let dstFilePath = normalizePath(`${pluginInstallPath}/${fileName}`);
+          await this.app.vault.adapter.copy(`${pluginFile}`, dstFilePath);
+        }
+        
+        //await this.app.vault.adapter.copy(`${plugin}`, `${pluginInstallPath}`);
         console.log(`${plugin} install to ${pluginInstallPath}`);
       }
       const statusBarItem = this.addStatusBarItem();
+      new Notice('插件更新完成');
       statusBarItem.setText('插件更新完成');
       setTimeout(() => {
           statusBarItem.setText("");
       }, 5000);
     }
-
   }
 
   registerEditorMenu(): void {
