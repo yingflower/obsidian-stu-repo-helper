@@ -16,8 +16,6 @@ import { sendLLMRequest } from './llm'
 import en from './locales/en'
 import zh from './locales/zh-CN'
 
-
-
 export default class StudentRepoPlugin extends Plugin {
   settings: StudentRepoSettings;
   trans: any;

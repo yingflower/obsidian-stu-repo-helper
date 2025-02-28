@@ -11,12 +11,19 @@ The Student Repository Helper is an Obsidian plugin designed for students or the
 ## Features
 - ***One-click conversion of test paper images to documents*** : Quickly and accurately convert test paper images into Markdown documents, greatly facilitating subsequent editing and material organization.
 - ***Image and text recognition***: Intelligent recognition and conversion of images and text: Utilize advanced image and text recognition technology to efficiently extract text information from test paper images and automatically generate Markdown documents, making it easy and efficient to obtain key information.
-- ***English learning assistant***: Exclusive assistant for English learning: In the context of English learning, it can not only generate professional and native voiceovers for English essays but also integrate the audio and text perfectly into a Markdown document, creating an immersive English learning experience for learners.
+- ***English learning assistant***: Exclusive assistant for English learning: In the context of English learning, it can not only generate professional and authentic voiceovers for English short texts, but also organically integrate machine translation, new word management, and grammatical analysis into the learning process, creating an immersive English learning experience for learners.
 - ***Wrong question intelligent analysis and expansion***:  Intelligent analysis and expansion of wrong questions: Through intelligent algorithms, conduct in-depth analysis of the knowledge points in wrong questions, automatically organize and summarize them, and generate new relevant questions based on the characteristics of wrong questions to help students strengthen their learning effects and deepen their understanding of knowledge.
 ## AI 服务提供商
 The following are the AI services used in the process of building the knowledge repository and the corresponding account application links. Please apply as needed:
 
-- Large language model: [Alibaba Tongyi Qianwen](https://bailian.console.aliyun.com/?apiKey=1#/api-key)
+- Large language model: 
+
+[Alibaba Tongyi Qianwen](https://bailian.console.aliyun.com/?apiKey=1#/api-key)
+
+[Doubao](https://console.volcengine.com/ark/)
+
+[Deepseek](https://platform.deepseek.com/)
+
 - Text recognition: [Baidu Cloud General Text Recognition (High-precision Version)](https://console.bce.baidu.com/ai-engine/ocr/overview/index?_=1740120172878)
 - Speech synthesis: [Microsoft Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
 - Text translation: [Microsoft Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextTranslation)

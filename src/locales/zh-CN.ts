@@ -32,7 +32,7 @@ export default {
   ttsProvider: "微软Azure",
   studentGrade: `学生年级`,
   localLanguage: '本地语言',
-  llmSetting: `大模型配置`,
+  llmSetting: `大模型配置(千问/豆包/DeepSeek)`,
   ocrSetting: '文字识别与翻译',
   speechSetting: '语音合成',
   speechSubscriptionKey: '语音服务Key',

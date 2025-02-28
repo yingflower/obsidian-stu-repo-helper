@@ -15,7 +15,14 @@
 - ***错题智能分析拓展*** ：通过智能算法，深入分析错题知识点，自动整理归纳，并根据错题特征生成新的相关题目，帮助学生强化学习效果，加深知识理解。
 ## AI 服务提供商
 知识库搭建过程中会用到的 AI 服务以及其对应的账号申请链接如下，请大家按需申请：
-- 大语言模型：[阿里通义千问](https://bailian.console.aliyun.com/?apiKey=1#/api-key)
+- 大语言模型：
+
+[阿里通义千问](https://bailian.console.aliyun.com/?apiKey=1#/api-key)
+
+[字节豆包](https://console.volcengine.com/ark/)
+
+[Deepseek](https://platform.deepseek.com/)
+
 - 文字识别：[百度云通用文字识别（高精度版）](https://console.bce.baidu.com/ai-engine/ocr/overview/index?_=1740120172878)
 - 文字翻译：[百度云文本翻译-通用版](https://console.bce.baidu.com/ai-engine/machinetranslation/overview/index)
 - 语音合成：[微软Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)

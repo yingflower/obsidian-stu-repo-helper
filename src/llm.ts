@@ -15,6 +15,13 @@ const qwenSettings: LLMSettings = {
   modelName: 'qwen-turbo'
 };
 
+// Deepseek大模型配置
+const deepseekSettings: LLMSettings = {
+  apiBase: 'https://api.deepseek.com/chat/completions',
+  apiKey: '',
+  modelName: 'deepseek-chat'
+};
+
 // 调用大模型的函数
 export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): Promise<string> {
   try {

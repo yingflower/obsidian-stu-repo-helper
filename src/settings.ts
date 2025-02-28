@@ -111,8 +111,8 @@ export class StudentRepoSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', {text: this.plugin.trans.llmSetting});
     
     new Setting(containerEl)
-      .setName('API URL')
-      .setDesc(`${this.plugin.trans.llmProvider} LLM API URL`)
+      .setName('API Base URL')
+      .setDesc(`LLM API Base URL`)
       .addText(text => text
         .setPlaceholder('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions')
         .setValue(this.plugin.settings.llmSettings.apiBase)
@@ -122,7 +122,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Key')
-      .setDesc(`${this.plugin.trans.llmProvider} LLM API Key`)
+      .setDesc(`LLM API Key`)
       .addText(text => text
         .setPlaceholder('sk-***')
         .setValue(this.plugin.settings.llmSettings.apiKey)
@@ -132,7 +132,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('Model Name')
-      .setDesc(`${this.plugin.trans.llmProvider} LLM Model Name`)
+      .setDesc(`LLM Model Name`)
       .addText(text => text
         .setPlaceholder('qwen-turbo')
         .setValue(this.plugin.settings.llmSettings.modelName)

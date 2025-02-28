@@ -33,7 +33,7 @@ export default {
   ttsProvider: "Microsoft Azure",
   studentGrade: `Student Grade`,
   localLanguage: 'Local Language',
-  llmSetting: `LLM Settings`,
+  llmSetting: `LLM Settings(Qwen/Doubao/DeepSeek)`,
   ocrSetting: 'OCR and Translation',
   speechSetting: 'Speech Synthesis',
   speechSubscriptionKey: 'Speech Subscription Key',
