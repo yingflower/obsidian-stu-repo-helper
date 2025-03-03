@@ -42,7 +42,7 @@ export async function checkAccessToken(ocrSettings: OcrSettings): Promise<boolea
 		return false;
 	}
 	const newToken = await createToken(ocrSettings.apiKey, ocrSettings.apiSecret)
-  console.log('create new token', newToken);
+  //console.log('create new token', newToken);
   ocrSettings.accessToken = newToken;
   return true;
 }
@@ -114,8 +114,8 @@ export async function translateTextHttp(text: string, to_lang: string, ocrSettin
   const result = response.json;
   let result_text = '';
   result.result.trans_result.forEach((item: { src: string; dst: string }) => {
-    console.log('原文：', item.src);
-    console.log('译文：', item.dst);
+    //console.log('原文：', item.src);
+    //console.log('译文：', item.dst);
     result_text += item.dst;
   });
   return result_text;

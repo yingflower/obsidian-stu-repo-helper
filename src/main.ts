@@ -18,7 +18,7 @@ import zh from './locales/zh-CN'
 
 export default class StudentRepoPlugin extends Plugin {
   settings: StudentRepoSettings;
-  trans: any;
+  trans: Record<string, string>;
   isLangZh: boolean;;
 
   async onload() {
@@ -29,11 +29,7 @@ export default class StudentRepoPlugin extends Plugin {
     this.addSettingTab(new StudentRepoSettingTab(this.app, this));
     await this.loadSettings();
 
-    console.log('Student Repository Helper loaded');
-    console.log('Settings:', this.settings);
-    console.log('Platform isDesktop:', Platform.isDesktop);
-    console.log('Platform isMobile:', Platform.isMobile);
-    console.log('Platform isWin:', Platform.isWin);
+    console.debug('Student Repository Helper loaded');
 
     this.registerFileMenu();
     this.registerEditorMenu();
@@ -43,7 +39,7 @@ export default class StudentRepoPlugin extends Plugin {
   registerFileMenu(): void {
     this.registerEvent(
 			this.app.workspace.on('files-menu', (menu, files) => {
-        var isImages = isImageFiles(files)
+        let isImages = isImageFiles(files)
         if (isImages) {
           if (isImages) {
             menu.addItem((item) => {
@@ -66,7 +62,7 @@ export default class StudentRepoPlugin extends Plugin {
             item.setTitle(this.trans.createNodeFromImageMenu)
             .setIcon('document')
             .onClick(async() => {
-              var files = [file]
+              let files = [file]
               await createImagesNote(files)
             });
           })
@@ -88,7 +84,6 @@ export default class StudentRepoPlugin extends Plugin {
   async handleOcrRequest(imageFile: string, editor: Editor, line: number = -1): Promise<void> {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.imageToTexting);
-    console.log('文字识别:', imageFile);
     try {
       const file = await this.getLinkedFile(imageFile);
       if (!file) {
@@ -99,7 +94,7 @@ export default class StudentRepoPlugin extends Plugin {
         } else {
           new Notice(`Convert <${imageFile}> to text`);
         }
-        var imageBuffer: ArrayBuffer =  await this.app.vault.adapter.readBinary(file.path)
+        let imageBuffer: ArrayBuffer =  await this.app.vault.adapter.readBinary(file.path)
         // 使用百度云提供的文字识别服务
         const isUpdate = await checkAccessToken(this.settings.ocrSettings);
         if (isUpdate) {
@@ -137,7 +132,6 @@ export default class StudentRepoPlugin extends Plugin {
       const match = line.match(imageRegex);
       if (match) {
           const imagePath = match[1];
-          console.log(`Image match: ${imagePath} in line ${i}`)
           await this.handleOcrRequest(imagePath, editor, i + 1);
       }
     }
@@ -147,17 +141,17 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.textToSpeeching);
     try {
-      const { full_path, rel_path } = await this.getAudioFilePath(mdFile, this.settings)
+      const { full_path, rel_path } = await this.getAudioFilePath(text, mdFile, this.settings)
       text = removeMarkdownTags(text);
       
       console.time('textToSpeech')
-      let audio_buffer = await textToSpeechHttp(text, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
+      const audio_buffer = await textToSpeechHttp(text, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
       await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
       //await textToSpeech(text, full_path, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
       console.timeEnd('textToSpeech')
-      console.log(`Audio saved to ${rel_path}`);
+      //console.log(`Audio saved to ${rel_path}`);
       
-      let md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
+      const md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
       const startOffset = editor.getCursor('from');
       const nextLinePos = {line: startOffset.line, ch: 0};
       editor.replaceRange(md_text, nextLinePos);
@@ -185,9 +179,9 @@ export default class StudentRepoPlugin extends Plugin {
     editor.replaceRange(`(${translatedText})`, endOffset);
   }
 
-  async handleAddToWordBankRequest(word: string, editor: Editor): Promise<void> {
+  async handleAddToWordBankRequest(word: string, mdFile: TFile, editor: Editor): Promise<void> {
     const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word);
-    var phonetics = await sendLLMRequest(prompt, this.settings.llmSettings);
+    let phonetics = await sendLLMRequest(prompt, this.settings.llmSettings);
     if (!phonetics.startsWith('/')) {
       phonetics = `/${phonetics}/`;
     }
@@ -199,12 +193,17 @@ export default class StudentRepoPlugin extends Plugin {
     }
     let toLang = this.settings.stuSettings.localLanguage === 'zh-Hans' ? 'zh' : 'en';
     const translatedText = await translateTextHttp(word, toLang, this.settings.ocrSettings)
-    const lastLine = editor.lastLine();
+    let lastLine = editor.lastLine();
     const lastLineText = editor.getLine(lastLine);
+
+    const { full_path, rel_path } = await this.getAudioFilePath(word, mdFile, this.settings)
+    const audio_buffer = await textToSpeechHttp(word, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
+    await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
+
     if (lastLineText.startsWith(' - ')) {
-      editor.setLine(lastLine + 1, `\n - ${word} ${phonetics} ${translatedText}`);
+      editor.setLine(lastLine+1, `\n - ${word} ${phonetics} ${translatedText} ![[${rel_path}]]`);
     } else {
-      editor.setLine(lastLine + 1, `\n\n Word Bank \n - ${word} ${phonetics}  ${translatedText}`);
+      editor.setLine(lastLine+1, `\n\n Word Bank \n - ${word} ${phonetics} ${translatedText} ![[${rel_path}]]`);
     }
   }
 
@@ -231,7 +230,7 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText("思考中...");
     try {
-      var prompt = '';
+      let prompt = '';
       if (this.settings.stuSettings.localLanguage === 'zh-Hans') {
         prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', topic).replace('{LANGUAGE}', '中文');
       } else {
@@ -255,7 +254,7 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.thinking);
     try {
-      var prompt = '';
+      let prompt = '';
       if (this.settings.stuSettings.localLanguage === 'zh-Hans') {
         prompt = GENERATE_LEARNING_POINTS_TEMPLATE.replace('{TOPIC}', topic).replace('{LANGUAGE}', '中文');
       } else {
@@ -280,9 +279,8 @@ export default class StudentRepoPlugin extends Plugin {
       const listFiles = await this.app.vault.adapter.list('plugins');
       for (let i = 0; i < listFiles.folders.length; i++) {
         const plugin = listFiles.folders[i];
-        const pluginInstallPath = normalizePath(`.obsidian/${plugin}`);
-        if (await this.app.vault.adapter.exists(pluginInstallPath)) {
-        await this.app.vault.adapter.rmdir(pluginInstallPath, true);
+        const pluginInstallPath = normalizePath(`${this.app.vault.configDir}/${plugin}`);
+        if (!await this.app.vault.adapter.exists(pluginInstallPath)) {
           await this.app.vault.adapter.mkdir(pluginInstallPath);
         }
         const pluginFiles = await this.app.vault.adapter.list(plugin);
@@ -290,11 +288,12 @@ export default class StudentRepoPlugin extends Plugin {
           const pluginFile = pluginFiles.files[j];
           let fileName = this.app.vault.getAbstractFileByPath(pluginFile)?.name;
           let dstFilePath = normalizePath(`${pluginInstallPath}/${fileName}`);
+          if (await this.app.vault.adapter.exists(dstFilePath)) {
+            await this.app.vault.adapter.remove(dstFilePath);
+          }
           await this.app.vault.adapter.copy(`${pluginFile}`, dstFilePath);
         }
-        
-        //await this.app.vault.adapter.copy(`${plugin}`, `${pluginInstallPath}`);
-        console.log(`${plugin} install to ${pluginInstallPath}`);
+        //console.log(`${plugin} install to ${pluginInstallPath}`);
       }
       const statusBarItem = this.addStatusBarItem();
       new Notice('插件更新完成');
@@ -312,7 +311,7 @@ export default class StudentRepoPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on('editor-menu', (menu, editor, view) => {
         const selection = editor.getSelection();
-        console.log('selection:', selection);
+
         const imageRegex = /!?\[?\[?(.*\.(jpg|jpeg|png|bmp))\]?\]?/;
         const match = selection.match(imageRegex);
 
@@ -343,7 +342,7 @@ export default class StudentRepoPlugin extends Plugin {
               .setTitle(this.trans.addWordBankMenu)
               .setIcon('document')
               .onClick(async() => {
-                this.handleAddToWordBankRequest(selection, editor);
+                this.handleAddToWordBankRequest(selection, view.file, editor);
               });
           })
           // 语法分析
@@ -387,17 +386,15 @@ export default class StudentRepoPlugin extends Plugin {
       icon: "languages",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
-        console.log('selection:', selection);
         this.handleTranslateTextRequest(selection, editor);
       }
     });
     this.addCommand({
       id: 'word_bank',
       name: this.trans.addWordBank,
-      icon: "rss",
+      icon: "notepad-text",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
-        console.log('selection:', selection);
         this.handleAddToWordBankRequest(selection, editor);
       }
     });
@@ -407,7 +404,6 @@ export default class StudentRepoPlugin extends Plugin {
       icon: "brain",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
-        console.log('selection:', selection);
         this.handleSyntaxAnalysisRequest(selection, editor);
       }
     });
@@ -418,7 +414,6 @@ export default class StudentRepoPlugin extends Plugin {
       icon: "activity",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
-        console.log('selection:', selection);
         this.handleTextToSpeechRequest(selection, view.file, editor);
       }
     });
@@ -429,7 +424,6 @@ export default class StudentRepoPlugin extends Plugin {
       icon: "brain",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
-        console.log('selection:', selection);
         this.handleGenSimilarTopicRequest(selection, editor);
         this.handleGenLearningPointRequest(selection, editor);
       }
@@ -473,7 +467,7 @@ export default class StudentRepoPlugin extends Plugin {
     return this.app.vault.getAbstractFileByPath(file.path);
   }
 
-  async getAudioFilePath(tfile: TFile, settings: StudentRepoSettings): {full_path: string; rel_path: string} {
+  async getAudioFilePath(text: string, tfile: TFile, settings: StudentRepoSettings): {full_path: string; rel_path: string} {
     // Create output audio dir
     const audio_path = normalizePath(`${tfile.parent.path}/${settings.speechSettings.speechOutputPath}`)
     //console.log(`audio_path: ${audio_path}`)
@@ -481,27 +475,23 @@ export default class StudentRepoPlugin extends Plugin {
       await this.app.vault.adapter.mkdir(audio_path)
     }
     // Get output mp3 file path
-    var audio_full_path = this.app.vault.adapter.getFullPath(audio_path)
+    let audio_full_path = this.app.vault.adapter.getFullPath(audio_path)
     //console.log(`audio_full_path: ${audio_full_path}`)
-    var full_path = '';
-    var rel_path = '';
-    var i = 0;
-    do {
-      var output_fname = ''
-      if (i > 0) {
-        output_fname = `${tfile.basename}_${i}.mp3`;
-      } else {
-        output_fname = `${tfile.basename}.mp3`;
-      }
-      
-      //console.log(`output_fname: ${output_fname}`)
+    let full_path = '';
+    let rel_path = '';
+    //let i = 0;
+    //do {
+    let output_fname = ''
+    output_fname = `${getFirstFiveWords(text)}.mp3`;
 
-      full_path = normalizePath(`${audio_full_path}/${output_fname}`);
-      //console.log(`full_path: ${full_path}`)
-      rel_path = normalizePath(`${audio_path}/${output_fname}`);
-      //console.log(`rel_path: ${rel_path}`)
-      i++;
-    } while (await this.app.vault.adapter.exists(rel_path));
+    //console.log(`output_fname: ${output_fname}`)
+
+    full_path = normalizePath(`${audio_full_path}/${output_fname}`);
+    //console.log(`full_path: ${full_path}`)
+    rel_path = normalizePath(`${audio_path}/${output_fname}`);
+    //console.log(`rel_path: ${rel_path}`)
+      //i++;
+    //} while (await this.app.vault.adapter.exists(rel_path));
     
     return {full_path, rel_path};
   }
@@ -518,6 +508,18 @@ export default class StudentRepoPlugin extends Plugin {
   }
 }
 
+function getFirstFiveWords(text: string): string {
+  // 使用正则表达式匹配单词，\b 表示单词边界，\w+ 表示一个或多个字母、数字或下划线
+  const words = text.match(/\b\w+\b/g);
+  if (!words) {
+      return '';
+  }
+  // 如果单词数量少于 5 个，返回所有单词；否则返回前 5 个单词
+  const selectedWords = words.length < 5 ? words : words.slice(0, 5);
+  // 将选中的单词数组用空格连接成一个字符串
+  return selectedWords.join(' ');
+}
+
 function isFileMarkdown(path: string): boolean {
   return path.endsWith('.md')
 }
@@ -530,9 +532,8 @@ function isFileImage(path: string): boolean {
 }
 
 function isImageFiles(files: TFile[]): boolean {
-  var j:any
-  for (j in files) {
-    var f_path = files[j].path
+  for (const file of files) {
+    let f_path = file.path
     if (!isFileImage(f_path)) {
       return false
     }
@@ -559,7 +560,6 @@ async function createNote(name: string, contents = ''): Promise<void> {
       pathPrefix += '/'
     }
     let path = `${pathPrefix}${name}`
-    console.log(`pathPrefix: ${pathPrefix}, name: ${name}`)
     // Check if file already exists
     if (app.vault.getAbstractFileByPath(`${path}.md`)) {
       // Append a number to the end of the file name
@@ -579,22 +579,14 @@ async function createNote(name: string, contents = ''): Promise<void> {
   }
 }
 
-async function createImagesNote(files: TFile[]) {
-  var j:any
-  var file_paths:string[] = new Array(files.length)
-  for (j in files) {
-    console.log(`ppath: ${files[j].parent.path}, pname: ${files[j].parent.name}`)
-    file_paths[j] = files[j].path
-  }
-  file_paths.sort()
-  var contents:string = ''
-  for (j in file_paths) {
-    console.log(file_paths[j])
-    contents += `![[${file_paths[j]}]]\n`
-  }
-  console.log(contents)
+async function createImagesNote(files: TFile[]): Promise<void> {
+  const filePaths: string[] = files.map(file => file.path);
+  filePaths.sort();
+
+  let contents: string = filePaths.map(path => `![[${path}]]`).join('\n');
+
   // Create a new note and open it
-  await createNote("Untitled", contents)
+  await createNote("Untitled", contents);
 }
 
 function addQuoteToText(text: string, note: string): string {

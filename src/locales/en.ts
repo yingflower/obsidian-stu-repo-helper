@@ -8,7 +8,7 @@ const translateText = "Translate";
 const addWordBank = "Add to Word Bank";
 const syntaxAnalysis = "Syntax Analysis";
 
-export default {
+const en: Record<string, string> = {
   pluginName: `${pluginName}`,
   similarTopics: `${similarTopics}`,
   learningPoints: `${learningPoints}`,
@@ -49,3 +49,5 @@ export default {
   translating: "Translating...",
   thinking: "Thinking...",
 };
+
+export default en;

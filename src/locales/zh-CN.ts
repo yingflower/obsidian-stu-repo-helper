@@ -7,7 +7,7 @@ const translateText = "翻译";
 const addWordBank = "加单词库";
 const syntaxAnalysis = "语法分析";
 
-export default {
+const zh: Record<string, string> = {
   pluginName: `${pluginName}`,
   similarTopics: `${similarTopics}`,
   learningPoints: `${learningPoints}`,
@@ -49,3 +49,5 @@ export default {
   translating: "翻译中...",
   thinking: "思考中...",
 };
+
+export default zh;

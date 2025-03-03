@@ -36,7 +36,7 @@ export async function imageToText(imageBuffer: ArrayBuffer, subscriptionKey: str
     new Notice(`Image to text error ${response.status}`);
     return '';
   }
-  console.log(response);
+  //console.log(response);
 
   const result = response.json;
   // 提取识别到的文字
@@ -52,7 +52,7 @@ export async function imageToText(imageBuffer: ArrayBuffer, subscriptionKey: str
       }
       text += '\n';
     }
-    console.log('图片转文字结果:', text);
+    //console.log('图片转文字结果:', text);
     total_text += text;
   }
   return total_text;
