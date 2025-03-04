@@ -151,7 +151,8 @@ export default class StudentRepoPlugin extends Plugin {
       console.timeEnd('textToSpeech')
       //console.log(`Audio saved to ${rel_path}`);
       
-      const md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
+      //const md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
+      const md_text = `![[${rel_path}]]\n`
       const startOffset = editor.getCursor('from');
       const nextLinePos = {line: startOffset.line, ch: 0};
       editor.replaceRange(md_text, nextLinePos);
@@ -196,20 +197,17 @@ export default class StudentRepoPlugin extends Plugin {
     let lastLine = editor.lastLine();
     const lastLineText = editor.getLine(lastLine);
 
-    const { full_path, rel_path } = await this.getAudioFilePath(word, mdFile, this.settings)
-    const audio_buffer = await textToSpeechHttp(word, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
-    await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
-
     if (lastLineText.startsWith(' - ')) {
-      editor.setLine(lastLine+1, `\n - ${word} ${phonetics} ${translatedText} ![[${rel_path}]]`);
+      editor.setLine(lastLine+1, `\n - ${word} ${phonetics} ${translatedText}`);
     } else {
-      editor.setLine(lastLine+1, `\n\n Word Bank \n - ${word} ${phonetics} ${translatedText} ![[${rel_path}]]`);
+      editor.setLine(lastLine+1, `\n\n Word Bank \n - ${word} ${phonetics} ${translatedText}`);
     }
+
   }
 
   async handleSyntaxAnalysisRequest(text: string, editor: Editor): Promise<void> {
     const statusBarItem = this.addStatusBarItem();
-    statusBarItem.setText("思考中...");
+    statusBarItem.setText(this.trans.thinking);
     try {
       const prompt = SYNTAX_ANALYSIS_TEMPLATE.replace('{TEXT}', text);
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
@@ -228,7 +226,7 @@ export default class StudentRepoPlugin extends Plugin {
 
   async handleGenSimilarTopicRequest(topic: string, editor: Editor): Promise<void> {
     const statusBarItem = this.addStatusBarItem();
-    statusBarItem.setText("思考中...");
+    statusBarItem.setText(this.trans.thinking);
     try {
       let prompt = '';
       if (this.settings.stuSettings.localLanguage === 'zh-Hans') {
@@ -392,10 +390,10 @@ export default class StudentRepoPlugin extends Plugin {
     this.addCommand({
       id: 'word_bank',
       name: this.trans.addWordBank,
-      icon: "notepad-text",
+      icon: "pencil-line",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
-        this.handleAddToWordBankRequest(selection, editor);
+        this.handleAddToWordBankRequest(selection, view.file, editor);
       }
     });
     this.addCommand({
@@ -411,7 +409,7 @@ export default class StudentRepoPlugin extends Plugin {
     this.addCommand({
       id: 'text_to_speech',
       name: this.trans.textToSpeech,
-      icon: "activity",
+      icon: "rss",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
         this.handleTextToSpeechRequest(selection, view.file, editor);
