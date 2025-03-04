@@ -141,7 +141,7 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.textToSpeeching);
     try {
-      const { full_path, rel_path } = await this.getAudioFilePath(text, mdFile, this.settings)
+      const { full_path, rel_path } = await this.getAudioFilePath(mdFile, this.settings)
       text = removeMarkdownTags(text);
       
       console.time('textToSpeech')
@@ -465,7 +465,7 @@ export default class StudentRepoPlugin extends Plugin {
     return this.app.vault.getAbstractFileByPath(file.path);
   }
 
-  async getAudioFilePath(text: string, tfile: TFile, settings: StudentRepoSettings): {full_path: string; rel_path: string} {
+  async getAudioFilePath(tfile: TFile, settings: StudentRepoSettings): {full_path: string; rel_path: string} {
     // Create output audio dir
     const audio_path = normalizePath(`${tfile.parent.path}/${settings.speechSettings.speechOutputPath}`)
     //console.log(`audio_path: ${audio_path}`)
@@ -477,20 +477,14 @@ export default class StudentRepoPlugin extends Plugin {
     //console.log(`audio_full_path: ${audio_full_path}`)
     let full_path = '';
     let rel_path = '';
-    //let i = 0;
-    //do {
+    let i = 0;
+    do {
     let output_fname = ''
-    output_fname = `${getFirstFiveWords(text)}.mp3`;
-
-    //console.log(`output_fname: ${output_fname}`)
-
+      output_fname = `${tfile.basename}_${i}.mp3`;
     full_path = normalizePath(`${audio_full_path}/${output_fname}`);
-    //console.log(`full_path: ${full_path}`)
     rel_path = normalizePath(`${audio_path}/${output_fname}`);
-    //console.log(`rel_path: ${rel_path}`)
-      //i++;
-    //} while (await this.app.vault.adapter.exists(rel_path));
-    
+      i++;
+    } while (await this.app.vault.adapter.exists(rel_path));
     return {full_path, rel_path};
   }
 
