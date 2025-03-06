@@ -6,7 +6,7 @@
 </h4>
 
 # 简介
-学生知识库助手（Student Repository Helper）是一个面向学生或学生家长的Obsidian 插件，这款插件旨在解决学生在学习阶段面临的资料管理难题，将学习过程中产生的各类重要资料，如试卷、笔记、关键文档等，进行系统性的数字化整合与管理，并利用 AI 助手定期进行学习分析总结。随着时间的推移，它将助力你逐步搭建起一座专属你自己的知识宝库，这座宝库将伴随你一生，成为你知识成长与积累的坚实见证。
+学生知识库助手（Student Repository Helper）是一个面向学生或学生家长的Obsidian 插件，这款插件旨在解决学生在学习阶段面临的资料管理难题，将学习过程中产生的各类重要资料，如试卷、笔记、关键文档等，进行系统性的数字化整合与管理，并利用 AI 助手定期进行学习分析总结。随着时间的推移，它将助力你逐步搭建起一座专属你自己的知识宝库，这座宝库将伴随你一生，成为你知识成长与积累的见证。
 
 ## 特性
 - ***试卷图片一键转档*** ：将试卷图片迅速、精准地转化为 markdown 文档，极大地方便后续的编辑与资料整理工作。
@@ -30,28 +30,35 @@
 ## 如何使用
 ### 配置插件
 打开插件设置，输入你的 AI 服务提供商的账号信息，示例如下图：
-![插件设置](images/zh/settings.png)
+![插件设置](docs/images/zh/settings.png)
 
 ### 试卷图片一键转档
-![图片一键转档](images/zh/create_note.gif)
+![图片一键转档](docs/images/zh/create_note.gif)
 
 ### 图文识别转换
-![文字识别](images/zh/image2text.gif)
+![文字识别](docs/images/zh/image2text.gif)
 
 ### 英文短文配音
-![短文配音](images/zh/text2speech.gif)
+![短文配音](docs/images/zh/text2speech.gif)
 
 ### 英语文本翻译
-![文本翻译](images/zh/translate.gif)
+![文本翻译](docs/images/zh/translate.gif)
 
 ### 英语生词管理
-![生词管理](images/zh/add_word_bank.gif)
+![生词管理](docs/images/zh/add_word_bank.gif)
 
 ### 英语语法分析
-![语法分析](images/zh/grammar_analysis.gif)
+![语法分析](docs/images/zh/grammar_analysis.gif)
 
 ### 题目智能分析拓展
-![错题智能分析](images/zh/request_llm.gif)
+![错题智能分析](docs/images/zh/request_llm.gif)
+
+### 规划中功能：
+
+- 知识库内容检索；
+- 英语生词库集中管理；
+- 图片文字描述自动生成；
+- 产品可持续发展：用户反馈与需求收集
 
 ## 建议
 为了更好的控制音频播放，建议安装：[Obsidian Audio Player 插件](https://github.com/noonesimg/obsidian-audio-player).

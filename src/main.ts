@@ -1,4 +1,14 @@
-import { App, Notice, Plugin, TAbstractFile, TFile, Platform, Editor, MarkdownView, normalizePath } from 'obsidian';
+import { 
+  App, 
+  Notice, 
+  Plugin,
+  AbstractFile, 
+  TFile, 
+  Platform, 
+  Editor,
+  MarkdownView,
+  normalizePath
+} from 'obsidian';
 import { StudentRepoSettings, DEFAULT_SETTINGS } from './settings';
 import { StudentRepoSettingTab } from './settings';
 import { textToSpeechHttp } from "./ms_azure";
@@ -28,7 +38,6 @@ export default class StudentRepoPlugin extends Plugin {
 
     this.addSettingTab(new StudentRepoSettingTab(this.app, this));
     await this.loadSettings();
-
     console.debug('Student Repository Helper loaded');
 
     this.registerFileMenu();
@@ -390,7 +399,7 @@ export default class StudentRepoPlugin extends Plugin {
     this.addCommand({
       id: 'word_bank',
       name: this.trans.addWordBank,
-      icon: "pencil-line",
+      icon: "pen-line",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
         this.handleAddToWordBankRequest(selection, view.file, editor);
@@ -479,10 +488,10 @@ export default class StudentRepoPlugin extends Plugin {
     let rel_path = '';
     let i = 0;
     do {
-    let output_fname = ''
+      let output_fname = ''
       output_fname = `${tfile.basename}_${i}.mp3`;
-    full_path = normalizePath(`${audio_full_path}/${output_fname}`);
-    rel_path = normalizePath(`${audio_path}/${output_fname}`);
+      full_path = normalizePath(`${audio_full_path}/${output_fname}`);
+      rel_path = normalizePath(`${audio_path}/${output_fname}`);
       i++;
     } while (await this.app.vault.adapter.exists(rel_path));
     return {full_path, rel_path};

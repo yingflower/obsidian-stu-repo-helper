@@ -32,21 +32,21 @@ The following are the AI services used in the process of building the knowledge 
 ### Configure the Plugin
 Open the plugin settings and enter the account information of your AI service provider. An example is shown in the following figure:
 
-![Plugin Settings](images/en/settings.png)
+![Plugin Settings](docs/images/en/settings.png)
 
 ### One-click Conversion of Test Paper Images to Documents
-![One-click Conversion of Images to Documents](images/en/create_note.gif)
+![One-click Conversion of Images to Documents](docs/images/en/create_note.gif)
 
 ### Image and Text Recognition and Conversion
-![Text Recognition](images/en/image2text.gif)
+![Text Recognition](docs/images/en/image2text.gif)
 
 ### Voiceover for English Essays
-![Voiceover for Essays](images/en/text2speech.gif)
+![Voiceover for Essays](docs/images/en/text2speech.gif)
 
-![Word Translation](images/en/translate.gif)
+![Word Translation](docs/images/en/translate.gif)
 
 ### Intelligent Analysis and Expansion of Questions
-![Intelligent Analysis of Wrong Questions](images/en/request_llm.gif)
+![Intelligent Analysis of Wrong Questions](docs/images/en/request_llm.gif)
 
 ## Suggestion
 To better control audio playback, it is recommended to install the [Obsidian Audio Player plugin](https://github.com/noonesimg/obsidian-audio-player).
