@@ -30,27 +30,35 @@
 ## 如何使用
 ### 配置插件
 打开插件设置，输入你的 AI 服务提供商的账号信息，示例如下图：
+
 ![插件设置](docs/images/zh/settings.png)
 
 ### 试卷图片一键转档
+
 ![图片一键转档](docs/images/zh/create_note.gif)
 
 ### 图文识别转换
+
 ![文字识别](docs/images/zh/image2text.gif)
 
 ### 英文短文配音
+
 ![短文配音](docs/images/zh/text2speech.gif)
 
 ### 英语文本翻译
+
 ![文本翻译](docs/images/zh/translate.gif)
 
 ### 英语生词管理
+
 ![生词管理](docs/images/zh/add_word_bank.gif)
 
 ### 英语语法分析
+
 ![语法分析](docs/images/zh/grammar_analysis.gif)
 
 ### 题目智能分析拓展
+
 ![错题智能分析](docs/images/zh/request_llm.gif)
 
 ### 规划中功能：

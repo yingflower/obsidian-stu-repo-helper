@@ -35,17 +35,21 @@ Open the plugin settings and enter the account information of your AI service pr
 ![Plugin Settings](docs/images/en/settings.png)
 
 ### One-click Conversion of Test Paper Images to Documents
+
 ![One-click Conversion of Images to Documents](docs/images/en/create_note.gif)
 
 ### Image and Text Recognition and Conversion
+
 ![Text Recognition](docs/images/en/image2text.gif)
 
 ### Voiceover for English Essays
+
 ![Voiceover for Essays](docs/images/en/text2speech.gif)
 
 ![Word Translation](docs/images/en/translate.gif)
 
 ### Intelligent Analysis and Expansion of Questions
+
 ![Intelligent Analysis of Wrong Questions](docs/images/en/request_llm.gif)
 
 ## Suggestion
