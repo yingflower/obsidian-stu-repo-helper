@@ -4,6 +4,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 export interface StudentSettings {
   grade: string;
   localLanguage: string;
+  wordBankFile: string;
 }
 
 export interface AccessToken {
@@ -47,6 +48,7 @@ export const DEFAULT_SETTINGS: StudentRepoSettings = {
   stuSettings: {
     grade: '小学四年级',
     localLanguage: 'zh-Hans',
+    wordBankFile: ''
   },
   speechSettings: {
     subscriptionKey: '',

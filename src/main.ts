@@ -29,7 +29,7 @@ import zh from './locales/zh-CN'
 export default class StudentRepoPlugin extends Plugin {
   settings: StudentRepoSettings;
   trans: Record<string, string>;
-  isLangZh: boolean;;
+  isLangZh: boolean;
 
   async onload() {
     const locale = window.localStorage.getItem('language')
@@ -189,7 +189,36 @@ export default class StudentRepoPlugin extends Plugin {
     editor.replaceRange(`(${translatedText})`, endOffset);
   }
 
+  async getWordBankFile(): Promise<AbstractFile> {
+    let wordBankFile: AbstractFile = null
+    if (this.settings.stuSettings.wordBankFile) {
+      wordBankFile = this.app.vault.getAbstractFileByPath(this.settings.stuSettings.wordBankFile);
+    }
+
+    if (!wordBankFile) {
+      // Find word bank file
+      const files = this.app.vault.getFiles();
+      console.debug(`Files: ${files.length}`);
+      for (const file of files) {
+        if (file.name === 'Word Bank.md') {
+          console.debug(`Word Bank file found: ${file.path}`);
+          wordBankFile = file;
+          break;
+        }
+      }
+      // Create word bank file
+      if (!wordBankFile) {
+        console.debug(`Word Bank file not found, create it`);
+        wordBankFile = await createNote('Word Bank', '', false);
+      }
+      this.settings.stuSettings.wordBankFile = wordBankFile.path;
+      this.saveSettings();
+    }
+    return wordBankFile;
+  }
+
   async handleAddToWordBankRequest(word: string, mdFile: TFile, editor: Editor): Promise<void> {
+     const wordBankFile = await this.getWordBankFile();
     const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word);
     let phonetics = await sendLLMRequest(prompt, this.settings.llmSettings);
     if (!phonetics.startsWith('/')) {
@@ -211,7 +240,10 @@ export default class StudentRepoPlugin extends Plugin {
     } else {
       editor.setLine(lastLine+1, `\n\n Word Bank \n - ${word} ${phonetics} ${translatedText}`);
     }
-
+    const content = await this.app.vault.read(wordBankFile);
+    if (!content.includes(word)) {
+      await this.app.vault.modify(wordBankFile, content + `\n- ${word} ${phonetics} ${translatedText} ([[${mdFile.path}]])`);
+    }
   }
 
   async handleSyntaxAnalysisRequest(text: string, editor: Editor): Promise<void> {
@@ -542,7 +574,7 @@ function isImageFiles(files: TFile[]): boolean {
   return true
 }
 
-async function createNote(name: string, contents = ''): Promise<void> {
+async function createNote(name: string, contents = '', openInNewTab = true): Promise<TFile> {
   try {
     let pathPrefix: string
     switch (app.vault.getConfig('newFileLocation')) {
@@ -572,8 +604,11 @@ async function createNote(name: string, contents = ''): Promise<void> {
     }
 
     // Create and open the file
-    await app.vault.create(`${path}.md`, contents)
-    await app.workspace.openLinkText(path, '')
+    const file = await app.vault.create(`${path}.md`, contents)
+    if (openInNewTab) {
+      app.workspace.openLinkText(path, '', true)
+    }
+    return file;
   } catch (e) {
     new Notice('Text Extract - Could not create note: ' + (e as any).message)
     throw e
