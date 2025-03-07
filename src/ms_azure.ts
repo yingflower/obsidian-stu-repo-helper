@@ -27,7 +27,7 @@ export async function imageToText(imageBuffer: ArrayBuffer, subscriptionKey: str
     headers: headers,
     body: imageBuffer,
   };
-  //console.log(requestParam);
+  //console.debug(requestParam);
 
   const response = await requestUrl(requestParam);
 
@@ -36,7 +36,7 @@ export async function imageToText(imageBuffer: ArrayBuffer, subscriptionKey: str
     new Notice(`Image to text error ${response.status}`);
     return '';
   }
-  //console.log(response);
+  //console.debug(response);
 
   const result = response.json;
   // 提取识别到的文字
@@ -52,7 +52,7 @@ export async function imageToText(imageBuffer: ArrayBuffer, subscriptionKey: str
       }
       text += '\n';
     }
-    //console.log('图片转文字结果:', text);
+    //console.debug('图片转文字结果:', text);
     total_text += text;
   }
   return total_text;
@@ -83,7 +83,7 @@ export async function textToSpeechHttp(text: string, subscriptionKey: string, sp
       headers: headers,
       body: body,
   };
-  //console.log(requestParam);
+  //console.debug(requestParam);
 
   const response = await requestUrl(requestParam);
 
@@ -91,7 +91,7 @@ export async function textToSpeechHttp(text: string, subscriptionKey: string, sp
       console.error('Text to speech error', response)
       return new ArrayBuffer(0);
   }
-  //console.log(response);
+  //console.debug(response);
   // 返回音频数据
   return response.arrayBuffer;
 }
@@ -116,7 +116,7 @@ export async function translateText(text: string, targetLanguage: string, subscr
         headers: headers,
         body: JSON.stringify(body),
       };
-      //console.log(requestParam);
+      //console.debug(requestParam);
     
       const response = await requestUrl(requestParam);
     
@@ -124,7 +124,7 @@ export async function translateText(text: string, targetLanguage: string, subscr
         console.error('Send llm request error', response)
         return '';
       }
-      //console.log(response);
+      //console.debug(response);
     
       const result = response.json;
 

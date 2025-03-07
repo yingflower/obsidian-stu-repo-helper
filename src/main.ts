@@ -158,7 +158,7 @@ export default class StudentRepoPlugin extends Plugin {
       await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
       //await textToSpeech(text, full_path, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
       console.timeEnd('textToSpeech')
-      //console.log(`Audio saved to ${rel_path}`);
+      //console.debug(`Audio saved to ${rel_path}`);
       
       //const md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
       const md_text = `![[${rel_path}]]\n`
@@ -300,7 +300,7 @@ export default class StudentRepoPlugin extends Plugin {
           }
           await this.app.vault.adapter.copy(`${pluginFile}`, dstFilePath);
         }
-        //console.log(`${plugin} install to ${pluginInstallPath}`);
+        //console.debug(`${plugin} install to ${pluginInstallPath}`);
       }
       const statusBarItem = this.addStatusBarItem();
       new Notice('插件更新完成');
@@ -477,13 +477,13 @@ export default class StudentRepoPlugin extends Plugin {
   async getAudioFilePath(tfile: TFile, settings: StudentRepoSettings): {full_path: string; rel_path: string} {
     // Create output audio dir
     const audio_path = normalizePath(`${tfile.parent.path}/${settings.speechSettings.speechOutputPath}`)
-    //console.log(`audio_path: ${audio_path}`)
+    //console.debug(`audio_path: ${audio_path}`)
     if (!await this.app.vault.adapter.exists(audio_path)) {
       await this.app.vault.adapter.mkdir(audio_path)
     }
     // Get output mp3 file path
     let audio_full_path = this.app.vault.adapter.getFullPath(audio_path)
-    //console.log(`audio_full_path: ${audio_full_path}`)
+    //console.debug(`audio_full_path: ${audio_full_path}`)
     let full_path = '';
     let rel_path = '';
     let i = 0;

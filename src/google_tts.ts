@@ -7,7 +7,7 @@ export async function textToSpeech(text: string, output_fpath: string, settings:
     if (err) {
       throw new Error(err)
     }
-    console.log(`Audio saved to ${output_fpath}`)
+    //console.debug(`Audio saved to ${output_fpath}`)
   })
 
 }

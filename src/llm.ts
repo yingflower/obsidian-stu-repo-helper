@@ -52,7 +52,7 @@ export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): 
       headers: headers,
       body: jsonBody,
     };
-    //console.log(requestParam);
+    //console.debug(requestParam);
   
     const response = await requestUrl(requestParam);
   
@@ -60,7 +60,7 @@ export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): 
       console.error('Send llm request error', response)
       return '';
     }
-    //console.log(response);
+    //console.debug(response);
   
     const result = response.json;
     return result.choices[0].message.content;
@@ -69,21 +69,3 @@ export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): 
     throw error;
   }
 }
-
-/**
-// 使用示例
-import { GENERATE_SIMILAR_TOPIC_TEMPLATE } from './prompt'
-async function main() {
-    const grade = '小学四年级';
-    const topic = '7828减去578所得的差的一半，再除以25，商是多少？';
-    const prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE.replace('{GRADE}', grade).replace('{TOPIC}', topic);
-    try {
-        const result = await sendLLMRequest(prompt, qwenSettings);
-        console.log('大模型响应:', result);
-    } catch (error) {
-        console.error('出现错误:', error);
-    }
-}
-
-main();
-*/
