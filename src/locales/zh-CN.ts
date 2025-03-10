@@ -26,13 +26,14 @@ const zh: Record<string, string> = {
   createNodeFromImagesMenu: `${pluginName}: 从图片生成笔记`,
   createNodeFromImageMenu: `${pluginName}: 从图片生成笔记`,
   analysisAndSummarize: `分析&扩展`,
+
   // For settings
   llmProvider: "阿里千问",
   ocrProvider: "百度云",
   ttsProvider: "微软Azure",
   studentGrade: `学生年级`,
   localLanguage: '本地语言',
-  llmSetting: `大模型配置(千问/豆包/DeepSeek)`,
+  llmSetting: `大模型(千问/豆包/DeepSeek)`,
   ocrSetting: '文字识别与翻译',
   speechSetting: '语音合成',
   speechSubscriptionKey: '语音服务Key',
@@ -48,6 +49,13 @@ const zh: Record<string, string> = {
   textToSpeeching : "语音合成中...",
   translating: "翻译中...",
   thinking: "思考中...",
+
+  // For settings placeholder
+  studentGradePlaceholder: `小学四年级`,
+  ocrAppIDPlaceholder: '你申请到的APP ID',
+  ocrAPIKeyPlaceholder: '你申请到的API key',
+  ocrAPISecretPlaceholder: '你申请到的API secret',
+  speechSubscriptionKeyPlaceholder: '你的微软Azure语音服务Key',
 };
 
 export default zh;

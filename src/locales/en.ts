@@ -1,12 +1,12 @@
 
-const pluginName = "Student Repo";
-const similarTopics = "Similar Topics";
-const learningPoints = "Knowledge Points";
-const imageToText = "Image to Text";
-const textToSpeech = "Text to Speech";
+const pluginName = "Student repo";
+const similarTopics = "Similar topics";
+const learningPoints = "Knowledge points";
+const imageToText = "Image to text";
+const textToSpeech = "Text to speech";
 const translateText = "Translate";
-const addWordBank = "Add to Word Bank";
-const syntaxAnalysis = "Syntax Analysis";
+const addWordBank = "Add to word bank";
+const syntaxAnalysis = "Syntax analysis";
 
 const en: Record<string, string> = {
   pluginName: `${pluginName}`,
@@ -27,27 +27,36 @@ const en: Record<string, string> = {
   createNodeFromImagesMenu: `${pluginName}: Create note from images`,
   createNodeFromImageMenu: `${pluginName}: Create note from image`,
   analysisAndSummarize: `Analyze & Summarize`,
+
   // For settings
   llmProvider: "Alibaba Qwen",
   ocrProvider: "Baidu Cloud",
   ttsProvider: "Microsoft Azure",
-  studentGrade: `Student Grade`,
-  localLanguage: 'Local Language',
-  llmSetting: `LLM Settings(Qwen/Doubao/DeepSeek)`,
-  ocrSetting: 'OCR and Translation',
-  speechSetting: 'Speech Synthesis',
-  speechSubscriptionKey: 'Speech Subscription Key',
-  speechVoiceType: 'Speech Voice Type',
+  studentGrade: `Student grade`,
+  localLanguage: 'Local language',
+  llmSetting: `LLM(Qwen/Doubao/DeepSeek)`,
+  ocrSetting: 'OCR and translation',
+  speechSetting: 'Speech synthesis',
+  speechSubscriptionKey: 'Speech subscription key',
+  speechVoiceType: 'Speech voice type',
   speechVoiceGB: 'Great Britain',
   speechVoiceCN: 'Mandarin',
   speechVoiceUS: 'USA',
-  mtSubscriptionKey: 'Translation Subscription Key',
+  mtSubscriptionKey: 'Translation subscription key',
+
   // For status bar
-  errorHappen: "Error Happened",
+  errorHappen: "Error happened",
   imageToTexting: "Image to text...",
   textToSpeeching : "Text to speech...",
   translating: "Translating...",
   thinking: "Thinking...",
+
+  // For settings placeholder
+  studentGradePlaceholder: `Grade 4`,
+  ocrAppIDPlaceholder: 'Your APP ID',
+  ocrAPIKeyPlaceholder: 'Your API key',
+  ocrAPISecretPlaceholder: 'Your API secret',
+  speechSubscriptionKeyPlaceholder: 'Your Microsoft Azure speech subscription key',
 };
 
 export default en;

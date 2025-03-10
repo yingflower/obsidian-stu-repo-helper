@@ -6,11 +6,5 @@
 	"description": "Manage student repositories.",
 	"author": "Feirong.zfr",
 	"authorUrl": "https://github.com/yingflower",
-	"isDesktopOnly": false,
-	"permissions": {
-		"filesystem": [
-			"read",
-			"write"
-		]
-	}
+	"isDesktopOnly": false
 }

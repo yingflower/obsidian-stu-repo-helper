@@ -55,6 +55,7 @@ export default class StudentRepoPlugin extends Plugin {
               item.setTitle(this.trans.createNodeFromImagesMenu)
               .setIcon('document')
               .onClick(async() => {
+                console.debug('Create note from images');
                 await createImagesNote(files)
               });
             });
@@ -72,6 +73,7 @@ export default class StudentRepoPlugin extends Plugin {
             .setIcon('document')
             .onClick(async() => {
               let files = [file]
+              console.debug('Create note from image');
               await createImagesNote(files)
             });
           })
@@ -131,7 +133,6 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleImagesToTextRequest(mdFile: TFile, editor: Editor): Promise<void> {
-
     // Parse md file, get all image links
     const mdContent = await this.app.vault.read(mdFile);
     const lines = mdContent.split('\n');
@@ -153,11 +154,10 @@ export default class StudentRepoPlugin extends Plugin {
       const { full_path, rel_path } = await this.getAudioFilePath(mdFile, this.settings)
       text = removeMarkdownTags(text);
       
-      console.time('textToSpeech')
+      //console.time('textToSpeech')
       const audio_buffer = await textToSpeechHttp(text, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
       await this.app.vault.adapter.writeBinary(rel_path, audio_buffer)
-      //await textToSpeech(text, full_path, this.settings.speechSettings.subscriptionKey, this.settings.speechSettings.speechVoice)
-      console.timeEnd('textToSpeech')
+      //console.timeEnd('textToSpeech')
       //console.debug(`Audio saved to ${rel_path}`);
       
       //const md_text = `\`\`\`audio-player\n [[${rel_path}]]\n\`\`\`\n`
@@ -218,7 +218,7 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleAddToWordBankRequest(word: string, mdFile: TFile, editor: Editor): Promise<void> {
-     const wordBankFile = await this.getWordBankFile();
+    //const wordBankFile = await this.getWordBankFile();
     const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word);
     let phonetics = await sendLLMRequest(prompt, this.settings.llmSettings);
     if (!phonetics.startsWith('/')) {
@@ -240,10 +240,12 @@ export default class StudentRepoPlugin extends Plugin {
     } else {
       editor.setLine(lastLine+1, `\n\n Word Bank \n - ${word} ${phonetics} ${translatedText}`);
     }
+    /**
     const content = await this.app.vault.read(wordBankFile);
     if (!content.includes(word)) {
-      await this.app.vault.modify(wordBankFile, content + `\n- ${word} ${phonetics} ${translatedText} ([[${mdFile.path}]])`);
+      await this.app.vault.modify(wordBankFile, content + `\n- ${word} ${phonetics} ${translatedText} ([[${mdFile.name}]])`);
     }
+    */
   }
 
   async handleSyntaxAnalysisRequest(text: string, editor: Editor): Promise<void> {
@@ -334,12 +336,7 @@ export default class StudentRepoPlugin extends Plugin {
         }
         //console.debug(`${plugin} install to ${pluginInstallPath}`);
       }
-      const statusBarItem = this.addStatusBarItem();
-      new Notice('插件更新完成');
-      statusBarItem.setText('插件更新完成');
-      setTimeout(() => {
-          statusBarItem.setText("");
-      }, 5000);
+      new Notice('Plugin updated');
     }
   }
 
@@ -450,7 +447,7 @@ export default class StudentRepoPlugin extends Plugin {
     this.addCommand({
       id: 'text_to_speech',
       name: this.trans.textToSpeech,
-      icon: "rss",
+      icon: "audio-lines",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
         this.handleTextToSpeechRequest(selection, view.file, editor);
@@ -490,7 +487,7 @@ export default class StudentRepoPlugin extends Plugin {
 
     this.addCommand({
       id: 'plugin_update',
-      name: "Plugin Update",
+      name: "Plugin update",
       icon: "arrow-up",
       callback: async () => {
         this.handlePluginUpdate();
@@ -574,39 +571,26 @@ function isImageFiles(files: TFile[]): boolean {
   return true
 }
 
-async function createNote(name: string, contents = '', openInNewTab = true): Promise<TFile> {
+async function createNote(name: string, contents = '', openInNewTab = true): Promise<TFile | null> {
+  console.debug(`Create note: ${name}`);
   try {
-    let pathPrefix: string
-    switch (app.vault.getConfig('newFileLocation')) {
-      case 'current':
-        pathPrefix = app.workspace.getActiveFile()?.parent?.path ?? ''
-        break
-      case 'folder':
-        pathPrefix = app.vault.getConfig('newFileFolderPath') as string
-        break
-      default: // 'root'
-        pathPrefix = ''
-        break
-    }
-    
-    if (pathPrefix) {
-      pathPrefix += '/'
-    }
+    let pathPrefix: string = this.app.fileManager.getNewFileParent('').path
+  
     let path = `${pathPrefix}${name}`
     // Check if file already exists
-    if (app.vault.getAbstractFileByPath(`${path}.md`)) {
+    if (this.app.vault.getAbstractFileByPath(`${path}.md`)) {
       // Append a number to the end of the file name
       let i = 1
-      while (await app.vault.getAbstractFileByPath(`${path} ${i}.md`)) {
+      while (await this.app.vault.getAbstractFileByPath(`${path} ${i}.md`)) {
         i++
       }
       path += ` ${i}`
     }
 
     // Create and open the file
-    const file = await app.vault.create(`${path}.md`, contents)
+    const file = await this.app.vault.create(`${path}.md`, contents)
     if (openInNewTab) {
-      app.workspace.openLinkText(path, '', true)
+      this.app.workspace.openLinkText(path, '');
     }
     return file;
   } catch (e) {
@@ -646,5 +630,7 @@ function removeMarkdownTags(text: string): string {
   text = text.replace(/^---+$/gm, '');
   // 去除 HTML 标签
   text = text.replace(/<[^>]*>/g, '');
+  // 去除文件链接标记
+  text = text.replace(/!\[\[.*\]\]/g, '');
   return text;
 }

@@ -87,12 +87,12 @@ export class StudentRepoSettingTab extends PluginSettingTab {
     let {containerEl} = this;
     containerEl.empty();
 
-    containerEl.createEl('h1', {text: this.plugin.trans.pluginName});
+    new Setting(containerEl).setName(this.plugin.trans.pluginName).setHeading();
     new Setting(containerEl)
       .setName(this.plugin.trans.studentGrade)
       .setDesc(this.plugin.trans.studentGrade)
       .addText(text => text
-        .setPlaceholder('小学四年级')
+        .setPlaceholder(this.plugin.trans.studentGradePlaceholder)
         .setValue(this.plugin.settings.stuSettings.grade)
         .onChange(async (value) => {
           this.plugin.settings.stuSettings.grade = value;
@@ -110,11 +110,11 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           this.plugin.saveSettings();
       });
     });
-    containerEl.createEl('h2', {text: this.plugin.trans.llmSetting});
-    
+
+    new Setting(containerEl).setName(this.plugin.trans.llmSetting).setHeading();
     new Setting(containerEl)
       .setName('API Base URL')
-      .setDesc(`LLM API Base URL`)
+      .setDesc(`LLM API base URL`)
       .addText(text => text
         .setPlaceholder('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions')
         .setValue(this.plugin.settings.llmSettings.apiBase)
@@ -124,7 +124,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Key')
-      .setDesc(`LLM API Key`)
+      .setDesc(`LLM API key`)
       .addText(text => text
         .setPlaceholder('sk-***')
         .setValue(this.plugin.settings.llmSettings.apiKey)
@@ -134,7 +134,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('Model Name')
-      .setDesc(`LLM Model Name`)
+      .setDesc(`LLM model name`)
       .addText(text => text
         .setPlaceholder('qwen-turbo')
         .setValue(this.plugin.settings.llmSettings.modelName)
@@ -143,12 +143,12 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     
-    containerEl.createEl('h2', {text: this.plugin.trans.ocrSetting});
+    new Setting(containerEl).setName(this.plugin.trans.ocrSetting).setHeading();
     new Setting(containerEl)
       .setName('APP ID')
       .setDesc(`${this.plugin.trans.ocrProvider} APP ID`)
       .addText(text => text
-        .setPlaceholder('你申请到的APP ID')
+        .setPlaceholder(this.plugin.trans.ocrAppIDPlaceholder)
         .setValue(this.plugin.settings.ocrSettings.appID)
         .onChange(async (value) => {
           this.plugin.settings.ocrSettings.appID = value;
@@ -156,9 +156,9 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Key')
-      .setDesc(`${this.plugin.trans.ocrProvider} API Key`)
+      .setDesc(`${this.plugin.trans.ocrProvider} API key`)
       .addText(text => text
-        .setPlaceholder('你申请到的API Key')
+        .setPlaceholder(this.plugin.trans.ocrAPIKeyPlaceholder)
         .setValue(this.plugin.settings.ocrSettings.apiKey)
         .onChange(async (value) => {
           this.plugin.settings.ocrSettings.apiKey = value;
@@ -166,45 +166,21 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName('API Secret')
-      .setDesc(`${this.plugin.trans.ocrProvider} API Secret`)
+      .setDesc(`${this.plugin.trans.ocrProvider} API secret`)
       .addText(text => text
-        .setPlaceholder('你申请到的API Secret')
+        .setPlaceholder(this.plugin.trans.ocrAPISecretPlaceholder)
         .setValue(this.plugin.settings.ocrSettings.apiSecret)
         .onChange(async (value) => {
           this.plugin.settings.ocrSettings.apiSecret = value;
           await this.plugin.saveSettings();
         }));
-    /**
-    containerEl.createEl('h2', {text: '音频合成'});
-    new Setting(containerEl)
-      .setName('音频语言')
-      .setDesc('生成音频的语言')
-      .addDropdown((dropdown) => {
-        dropdown.addOption('en', '英语');
-        dropdown.addOption('zh-cn', '普通话');
-        dropdown.setValue(this.plugin.settings.speechLanguage);
-        dropdown.onChange((option) => {
-            this.plugin.settings.speechLanguage = option;
-            this.plugin.saveSettings();
-        });
-      });
-    new Setting(containerEl)
-      .setName('音频保存目录')
-      .setDesc('音频存放位置')
-      .addText(text => text
-        .setPlaceholder('_audio')
-        .setValue(this.plugin.settings.speechOutputPath)
-        .onChange(async (value) => {
-          this.plugin.settings.speechOutputPath = value;
-          await this.plugin.saveSettings();
-        }));
-    */
-    containerEl.createEl('h2', {text: this.plugin.trans.speechSetting});
+
+    new Setting(containerEl).setName(this.plugin.trans.speechSetting).setHeading();
     new Setting(containerEl)
       .setName(this.plugin.trans.speechSubscriptionKey)
-      .setDesc('Microsoft Azure Speech Subscription Key')
+      .setDesc('Microsoft Azure speech subscription key')
       .addText(text => text
-        .setPlaceholder('Your Azure Speech Subscription Key')
+        .setPlaceholder(this.plugin.trans.speechSubscriptionKeyPlaceholder)
         .setValue(this.plugin.settings.speechSettings.subscriptionKey)
         .onChange(async (value) => {
           this.plugin.settings.speechSettings.subscriptionKey = value;
@@ -212,7 +188,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
         }));
     new Setting(containerEl)
       .setName(this.plugin.trans.speechVoiceType)
-      .setDesc('Speech Voice Type')
+      .setDesc('Speech voice type')
       .addDropdown((dropdown) => {
         dropdown.addOption('en-GB-SoniaNeural', this.plugin.trans.speechVoiceGB);
         dropdown.addOption('en-US-AmandaMultilingualNeural', this.plugin.trans.speechVoiceUS);
@@ -223,17 +199,5 @@ export class StudentRepoSettingTab extends PluginSettingTab {
             this.plugin.saveSettings();
         });
       });
-    /**
-    new Setting(containerEl)
-    .setName(this.plugin.trans.mtSubscriptionKey)
-    .setDesc('Microsoft Azure Translator Subscription Key')
-    .addText(text => text
-      .setPlaceholder('Your Azure Translator Subscription Key')
-      .setValue(this.plugin.settings.mtSettings.subscriptionKey)
-      .onChange(async (value) => {
-        this.plugin.settings.mtSettings.subscriptionKey = value;
-        await this.plugin.saveSettings();
-      }));
-    */
   };
 }
