@@ -217,8 +217,32 @@ export default class StudentRepoPlugin extends Plugin {
     return wordBankFile;
   }
 
-  async handleAddToWordBankRequest(word: string, mdFile: TFile, editor: Editor): Promise<void> {
-    //const wordBankFile = await this.getWordBankFile();
+  async addToWordBank(word: string, phonetics: string, translation: string, source: TFile): Promise<void> {
+    const wordBankFile = await this.getWordBankFile();
+    const curDate = getCurrentDate();
+  
+    let content = await this.app.vault.read(wordBankFile);
+    let wordStr = '';
+    // 判断是否是当天的单词, 增加空文件判断
+    const lines = content.split('\n');
+    const lastLine = lines[0];
+    if (lastLine.startsWith('###')) {
+      const lastDate = lastLine.split('###')[1].trim();
+      if (lastDate !== curDate) {
+        wordStr += `### ${curDate}\n`;
+      } else {
+        wordStr += `${lastLine}\n`;
+        content = content.substring(lastLine.length + 1);
+      }
+    } else {
+      wordStr += `### ${curDate}\n`;
+    }
+    
+    wordStr += ` - ${word} ${phonetics} ${translation} ([[${source.name}]]) \n`;
+    await this.app.vault.modify(wordBankFile, `${wordStr}${content}`);
+  }
+
+  async handleAddToWordBankRequest(word: string, source: TFile, editor: Editor): Promise<void> {
     const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word);
     let phonetics = await sendLLMRequest(prompt, this.settings.llmSettings);
     if (!phonetics.startsWith('/')) {
@@ -240,12 +264,7 @@ export default class StudentRepoPlugin extends Plugin {
     } else {
       editor.setLine(lastLine+1, `\n\n Word Bank \n - ${word} ${phonetics} ${translatedText}`);
     }
-    /**
-    const content = await this.app.vault.read(wordBankFile);
-    if (!content.includes(word)) {
-      await this.app.vault.modify(wordBankFile, content + `\n- ${word} ${phonetics} ${translatedText} ([[${mdFile.name}]])`);
-    }
-    */
+    await this.addToWordBank(word, phonetics, translatedText, source);
   }
 
   async handleSyntaxAnalysisRequest(text: string, editor: Editor): Promise<void> {
@@ -633,4 +652,12 @@ function removeMarkdownTags(text: string): string {
   // 去除文件链接标记
   text = text.replace(/!\[\[.*\]\]/g, '');
   return text;
+}
+
+function getCurrentDate(): string {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
