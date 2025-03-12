@@ -127,4 +127,6 @@ Open Obsidian, go to the third-party plugins in the settings, enable Student Rep
 
 ![Plugin settings](images/zh/settings.png)
 
+**Note**: If you need to use the function of painting analysis, then you need to apply for and configure a large model that supports multi-modalities. Otherwise, simply configuring a large model that supports text will suffice. 
+
 So far, the installation and configuration of the essential plugins for the student knowledge repository have been completed. Next, we can start building the student knowledge repository according to our own needs. 

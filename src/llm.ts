@@ -71,7 +71,7 @@ export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): 
   }
 }
 
-export async function genPaintingAnalysis(imageBuffer: ArrayBuffer, ext:string, llmSettings: LLMSettings): Promise<string> {
+export async function genPaintingAnalysis(imageBuffer: ArrayBuffer, ext:string, llmSettings: LLMSettings, lang: string): Promise<string> {
   try {
     const imageType = ext === 'jpg'?'jpeg':ext;
     const body = {
@@ -92,7 +92,7 @@ export async function genPaintingAnalysis(imageBuffer: ArrayBuffer, ext:string, 
           "content": [
             {
               "type": "text",
-              "text": IMAGE_ANALYSIS_TEMPLATE
+              "text": IMAGE_ANALYSIS_TEMPLATE.replace('{LANGUAGE}', lang)
             },
             {
               "type": "image_url",

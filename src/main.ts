@@ -17,8 +17,6 @@ import {
   GENERATE_SIMILAR_TOPIC_TEMPLATE,
   GENERATE_LEARNING_POINTS_TEMPLATE,
   GENERATE_WORD_PHONETICS_TEMPLATE,
-  GENERATE_LEARNING_POINTS_TEMPLATE_EN,
-  GENERATE_SIMILAR_TOPIC_TEMPLATE_EN,
   SYNTAX_ANALYSIS_TEMPLATE
 } from './prompt'
 
@@ -301,12 +299,7 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.thinking);
     try {
-      let prompt = '';
-      if (this.settings.stuSettings.localLanguage === 'zh-Hans') {
-        prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', topic).replace('{LANGUAGE}', '中文');
-      } else {
-        prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE_EN.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', topic).replace('{LANGUAGE}', 'English');
-      }
+      const prompt = GENERATE_SIMILAR_TOPIC_TEMPLATE.replace('{GRADE}', this.settings.stuSettings.grade).replace('{TOPIC}', topic).replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English');
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
       const endOffset = editor.getCursor('to');
       const nextLinePos = {line: endOffset.line + 1, ch: 0};
@@ -325,12 +318,8 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.thinking);
     try {
-      let prompt = '';
-      if (this.settings.stuSettings.localLanguage === 'zh-Hans') {
-        prompt = GENERATE_LEARNING_POINTS_TEMPLATE.replace('{TOPIC}', topic).replace('{LANGUAGE}', '中文');
-      } else {
-        prompt = GENERATE_LEARNING_POINTS_TEMPLATE_EN.replace('{TOPIC}', topic).replace('{LANGUAGE}', 'English');
-      }
+      const prompt = GENERATE_LEARNING_POINTS_TEMPLATE.replace('{TOPIC}', topic).replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English');
+
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
       const endOffset = editor.getCursor('to');
       const nextLinePos = {line: endOffset.line + 1, ch: 0};
@@ -356,7 +345,7 @@ export default class StudentRepoPlugin extends Plugin {
     statusBarItem.setText(this.trans.thinking);
     try {
       const imageBuffer: ArrayBuffer = await this.app.vault.adapter.readBinary(file.path);
-      const result = await genPaintingAnalysis(imageBuffer, file.extension, this.settings.llmSettings);
+      const result = await genPaintingAnalysis(imageBuffer, file.extension, this.settings.llmSettings, this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English');
       const endOffset = editor.getCursor('from');
       const linePos = {line: endOffset.line, ch: 0};
       editor.replaceRange(`${result}\n`, linePos);
