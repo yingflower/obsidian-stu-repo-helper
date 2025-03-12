@@ -1,5 +1,6 @@
-import { requestUrl } from 'obsidian';
+import { requestUrl, arrayBufferToBase64 } from 'obsidian';
 import { LLMSettings } from './settings'
+import { IMAGE_ANALYSIS_TEMPLATE } from './prompt';
 
 // 火山引擎大模型配置
 const doubaoSettings: LLMSettings = {
@@ -36,6 +37,70 @@ export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): 
         {
           "role": "user",
           "content": prompt
+        }
+      ]
+    };
+    const jsonBody = JSON.stringify(body);
+
+    const headers = {
+      'Content-Type': 'application/json',
+      // 使用 API Key 进行鉴权
+      'Authorization': `Bearer ${llmSettings.apiKey}` 
+    };
+    const requestParam = {
+      url: llmSettings.apiBase,
+      method: 'POST',
+      headers: headers,
+      body: jsonBody,
+    };
+    //console.debug(requestParam);
+  
+    const response = await requestUrl(requestParam);
+  
+    if (response.status != 200) {
+      console.error('Send llm request error', response)
+      return '';
+    }
+    //console.debug(response);
+  
+    const result = response.json;
+    return result.choices[0].message.content;
+  } catch (error) {
+    console.error('调用大模型出错:', error);
+    throw error;
+  }
+}
+
+export async function genPaintingAnalysis(imageBuffer: ArrayBuffer, ext:string, llmSettings: LLMSettings): Promise<string> {
+  try {
+    const imageType = ext === 'jpg'?'jpeg':ext;
+    const body = {
+      "model": llmSettings.modelName,
+      "tempreture": 1,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "你是一个绘画分析师。"
+            }
+          ] 
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": IMAGE_ANALYSIS_TEMPLATE
+            },
+            {
+              "type": "image_url",
+              "image_url": {
+                "url": `data:image/${imageType};base64,` + arrayBufferToBase64(imageBuffer)
+              }
+            }
+          ]
         }
       ]
     };

@@ -7,8 +7,10 @@ const textToSpeech = "Text to speech";
 const translateText = "Translate";
 const addWordBank = "Add to word bank";
 const syntaxAnalysis = "Syntax analysis";
+const paintingAnalysis = "Painting analysis";
 
 const en: Record<string, string> = {
+  // For command name
   pluginName: `${pluginName}`,
   similarTopics: `${similarTopics}`,
   learningPoints: `${learningPoints}`,
@@ -17,6 +19,10 @@ const en: Record<string, string> = {
   translateText: `${translateText}`,
   addWordBank: `${addWordBank}`,
   syntaxAnalysis: `${syntaxAnalysis}`,
+  analysisAndSummarize: `Analyze & Summarize`,
+  paintingAnalysis: `${paintingAnalysis}`,
+
+  // For menu
   imageToTextMenu: `${pluginName}: ${imageToText}`,
   textToSpeechMenu: `${pluginName}: ${textToSpeech}`,
   translateTextMenu: `${pluginName}: ${translateText}`,
@@ -26,7 +32,7 @@ const en: Record<string, string> = {
   genLearningPointsMenu: `${pluginName}: ${learningPoints}`,
   createNodeFromImagesMenu: `${pluginName}: Create note from images`,
   createNodeFromImageMenu: `${pluginName}: Create note from image`,
-  analysisAndSummarize: `Analyze & Summarize`,
+  paintingAnalysisMenu: `${pluginName}: ${paintingAnalysis}`,
 
   // For settings
   llmProvider: "Alibaba Qwen",

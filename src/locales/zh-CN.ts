@@ -6,8 +6,10 @@ const textToSpeech = "文字转语音";
 const translateText = "翻译";
 const addWordBank = "加单词库";
 const syntaxAnalysis = "语法分析";
+const paintingAnalysis = "绘画分析";
 
 const zh: Record<string, string> = {
+  // For command name
   pluginName: `${pluginName}`,
   similarTopics: `${similarTopics}`,
   learningPoints: `${learningPoints}`,
@@ -16,6 +18,10 @@ const zh: Record<string, string> = {
   translateText: `${translateText}`,
   addWordBank: `${addWordBank}`,
   syntaxAnalysis: `${syntaxAnalysis}`,
+  analysisAndSummarize: `分析&扩展`,
+  paintingAnalysis: `${paintingAnalysis}`,
+
+  // For menu name
   imageToTextMenu: `${pluginName}: ${imageToText}`,
   textToSpeechMenu: `${pluginName}: ${textToSpeech}`,
   translateTextMenu: `${pluginName}: ${translateText}`,
@@ -25,7 +31,7 @@ const zh: Record<string, string> = {
   genLearningPointsMenu: `${pluginName}: ${learningPoints}`,
   createNodeFromImagesMenu: `${pluginName}: 从图片生成笔记`,
   createNodeFromImageMenu: `${pluginName}: 从图片生成笔记`,
-  analysisAndSummarize: `分析&扩展`,
+  paintingAnalysisMenu: `${pluginName}: ${paintingAnalysis}`,
 
   // For settings
   llmProvider: "阿里千问",

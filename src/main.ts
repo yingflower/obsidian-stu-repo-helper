@@ -2,7 +2,7 @@ import {
   App, 
   Notice, 
   Plugin,
-  AbstractFile, 
+  TAbstractFile, 
   TFile, 
   Platform, 
   Editor,
@@ -22,7 +22,7 @@ import {
   SYNTAX_ANALYSIS_TEMPLATE
 } from './prompt'
 
-import { sendLLMRequest } from './llm'
+import { genPaintingAnalysis, sendLLMRequest } from './llm'
 import en from './locales/en'
 import zh from './locales/zh-CN'
 
@@ -84,6 +84,16 @@ export default class StudentRepoPlugin extends Plugin {
               const view = this.app.workspace.getActiveViewOfType(MarkdownView);
               if (view) {
                 await this.handleOcrRequest(file.path, view.editor);
+              }
+            });
+          })
+          menu.addItem((item) => {
+            item.setTitle(this.trans.paintingAnalysisMenu)
+            .setIcon('document')
+            .onClick(async() => {
+              const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+              if (view) {
+                await this.handlePaintingAnalysisRequest(file.path, view.editor);
               }
             });
           })
@@ -273,9 +283,10 @@ export default class StudentRepoPlugin extends Plugin {
     try {
       const prompt = SYNTAX_ANALYSIS_TEMPLATE.replace('{TEXT}', text);
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
-      const lastLine = editor.lastLine();
+      const endOffset = editor.getCursor('to');
+      const nextLinePos = {line: endOffset.line + 1, ch: 0};
       const displayText = `\n${text}\n\n ${result}`;
-      editor.setLine(lastLine + 1, `${addQuoteToText(displayText, this.trans.syntaxAnalysis)}\n\n`);
+      editor.replaceRange(`${addQuoteToText(displayText, this.trans.syntaxAnalysis)}\n\n`, nextLinePos);
       statusBarItem.setText("");
     } catch (error) {
       console.error(error);
@@ -334,6 +345,31 @@ export default class StudentRepoPlugin extends Plugin {
     }
   }
 
+  async handlePaintingAnalysisRequest(imageFile: string, editor: Editor): Promise<void> {
+    //console.debug(`Image file: ${imageFile}`);
+    const file = await this.getLinkedFile(imageFile);
+    if (!file) {
+      new Notice(`Image file not exist: ${imageFile}`);
+      return;
+    }
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText(this.trans.thinking);
+    try {
+      const imageBuffer: ArrayBuffer = await this.app.vault.adapter.readBinary(file.path);
+      const result = await genPaintingAnalysis(imageBuffer, file.extension, this.settings.llmSettings);
+      const endOffset = editor.getCursor('from');
+      const linePos = {line: endOffset.line, ch: 0};
+      editor.replaceRange(`${result}\n`, linePos);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
+  }
+
   async handlePluginUpdate(): Promise<void> {
     if (await this.app.vault.adapter.exists('plugins')) {
       const listFiles = await this.app.vault.adapter.list('plugins');
@@ -367,7 +403,7 @@ export default class StudentRepoPlugin extends Plugin {
       this.app.workspace.on('editor-menu', (menu, editor, view) => {
         const selection = editor.getSelection();
 
-        const imageRegex = /!?\[?\[?(.*\.(jpg|jpeg|png|bmp))\]?\]?/;
+        const imageRegex = /!?\[?\[?(.*\.(jpg|jpeg|png))\]?\]?/;
         const match = selection.match(imageRegex);
 
         if (!match) {
@@ -505,6 +541,22 @@ export default class StudentRepoPlugin extends Plugin {
     });
 
     this.addCommand({
+      id: 'painting_analysis',
+      name: this.trans.paintingAnalysis,
+      icon: "brain",
+      editorCallback: async (editor: Editor, view: MarkdownView) => {
+        const selection = editor.getSelection();
+        const imageRegex = /!?\[?\[?(.*\.(jpg|jpeg|png|bmp))\]?\]?/;
+        
+        const match = selection.match(imageRegex);
+        if (match) {
+          let imageFile = match[1]
+          this.handlePaintingAnalysisRequest(imageFile, editor);
+        } 
+      }
+    });
+
+    this.addCommand({
       id: 'plugin_update',
       name: "Plugin update",
       icon: "arrow-up",
@@ -618,7 +670,7 @@ async function createNote(name: string, contents = '', openInNewTab = true): Pro
   }
 }
 
-async function createImagesNote(files: TFile[]): Promise<void> {
+async function createImagesNote(files: TAbstractFile[]): Promise<void> {
   const filePaths: string[] = files.map(file => file.path);
   filePaths.sort();
 
