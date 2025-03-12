@@ -113,7 +113,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
 
     new Setting(containerEl).setName(this.plugin.trans.llmSetting).setHeading();
     new Setting(containerEl)
-      .setName('API Base URL')
+      .setName('API base URL')
       .setDesc(`LLM API base URL`)
       .addText(text => text
         .setPlaceholder('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions')
@@ -123,7 +123,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     new Setting(containerEl)
-      .setName('API Key')
+      .setName('API key')
       .setDesc(`LLM API key`)
       .addText(text => text
         .setPlaceholder('sk-***')
@@ -133,7 +133,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     new Setting(containerEl)
-      .setName('Model Name')
+      .setName('Model name')
       .setDesc(`LLM model name`)
       .addText(text => text
         .setPlaceholder('qwen-turbo')
@@ -155,7 +155,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     new Setting(containerEl)
-      .setName('API Key')
+      .setName('API key')
       .setDesc(`${this.plugin.trans.ocrProvider} API key`)
       .addText(text => text
         .setPlaceholder(this.plugin.trans.ocrAPIKeyPlaceholder)
@@ -165,7 +165,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     new Setting(containerEl)
-      .setName('API Secret')
+      .setName('API secret')
       .setDesc(`${this.plugin.trans.ocrProvider} API secret`)
       .addText(text => text
         .setPlaceholder(this.plugin.trans.ocrAPISecretPlaceholder)

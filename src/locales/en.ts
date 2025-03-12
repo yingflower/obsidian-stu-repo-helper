@@ -19,7 +19,7 @@ const en: Record<string, string> = {
   translateText: `${translateText}`,
   addWordBank: `${addWordBank}`,
   syntaxAnalysis: `${syntaxAnalysis}`,
-  analysisAndSummarize: `Analyze & Summarize`,
+  analysisAndSummarize: `Analyze & summarize`,
   paintingAnalysis: `${paintingAnalysis}`,
 
   // For menu
@@ -36,7 +36,7 @@ const en: Record<string, string> = {
 
   // For settings
   llmProvider: "Alibaba Qwen",
-  ocrProvider: "Baidu Cloud",
+  ocrProvider: "Baidu cloud",
   ttsProvider: "Microsoft Azure",
   studentGrade: `Student grade`,
   localLanguage: 'Local language',
