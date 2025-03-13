@@ -78,6 +78,3 @@
 ### 规划中功能：
 - 知识库内容检索；
 - 产品可持续发展：用户反馈与需求收集
-
-## 建议
-为了更好的控制音频播放，建议安装：[Obsidian Audio Player 插件](https://github.com/noonesimg/obsidian-audio-player).

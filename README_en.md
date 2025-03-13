@@ -77,5 +77,3 @@ This plugin supports the automatic generation of names and descriptions for stud
 
 ![Intelligent Analysis of Artwork Paintings](docs/images/zh/painting_analysis.gif) 
 
-## Suggestion
-To better control audio playback, it is recommended to install the [Obsidian Audio Player plugin](https://github.com/noonesimg/obsidian-audio-player).
