@@ -303,7 +303,7 @@ export default class StudentRepoPlugin extends Plugin {
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
       const endOffset = editor.getCursor('to');
       const nextLinePos = {line: endOffset.line + 1, ch: 0};
-      editor.replaceRange(`${addQuoteToText(result, this.trans.similarTopics)}\n\n`, nextLinePos);
+      editor.replaceRange(`${addQuoteToText(result, this.settings.stuSettings.localLanguage === 'zh-Hans'?'扩展题目':'Similar topics')}\n\n`, nextLinePos);
       statusBarItem.setText("");
     } catch (error) {
       console.error(error);
@@ -323,7 +323,7 @@ export default class StudentRepoPlugin extends Plugin {
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
       const endOffset = editor.getCursor('to');
       const nextLinePos = {line: endOffset.line + 1, ch: 0};
-      editor.replaceRange(`${addQuoteToText(result, this.trans.learningPoints)}\n\n`, nextLinePos);
+      editor.replaceRange(`${addQuoteToText(result, this.settings.stuSettings.localLanguage === 'zh-Hans'?'知识点':'Knowledge points')}\n\n`, nextLinePos);
       statusBarItem.setText("");
     } catch (error) {
       console.error(error);

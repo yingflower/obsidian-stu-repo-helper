@@ -1,6 +1,6 @@
 
 export const GENERATE_SIMILAR_TOPIC_TEMPLATE = `
-你的任务是根据已有的题目生成5道扩展题目，这些题目要符合{GRADE}的知识水平。
+你的任务是根据已有的题目生成3道扩展题目，这些题目要符合{GRADE}的知识水平。
 
 首先，已有题目如下：
 {TOPIC}
