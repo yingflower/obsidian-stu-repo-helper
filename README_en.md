@@ -76,4 +76,3 @@ For some error-prone or key question types, this plugin provides an intelligent 
 This plugin supports the automatic generation of names and descriptions for students' artwork paintings and handicrafts, which facilitates subsequent management and retrieval. In this way, every precious creation can be properly preserved and efficiently utilized.
 
 ![Intelligent Analysis of Artwork Paintings](docs/images/zh/painting_analysis.gif) 
-

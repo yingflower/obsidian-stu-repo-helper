@@ -87,6 +87,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
     let {containerEl} = this;
     containerEl.empty();
 
+    // 学生配置
     new Setting(containerEl).setName(this.plugin.trans.pluginName).setHeading();
     new Setting(containerEl)
       .setName(this.plugin.trans.studentGrade)
@@ -111,6 +112,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
       });
     });
 
+    // 大模型配置
     new Setting(containerEl).setName(this.plugin.trans.llmSetting).setHeading();
     new Setting(containerEl)
       .setName('API base URL')
@@ -143,6 +145,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     
+    // OCR 和翻译配置
     new Setting(containerEl).setName(this.plugin.trans.ocrSetting).setHeading();
     new Setting(containerEl)
       .setName('APP ID')
@@ -175,6 +178,7 @@ export class StudentRepoSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
+    // 语音合成配置
     new Setting(containerEl).setName(this.plugin.trans.speechSetting).setHeading();
     new Setting(containerEl)
       .setName(this.plugin.trans.speechSubscriptionKey)
@@ -199,5 +203,17 @@ export class StudentRepoSettingTab extends PluginSettingTab {
             this.plugin.saveSettings();
         });
       });
+    
+    // 意见收集
+    new Setting(containerEl)
+      .setName(this.plugin.trans.feedback).setHeading();
+    
+    // 添加一个 HTML 链接
+    const linkEl = containerEl.createEl('a', {
+      text: this.plugin.trans.feedbackDesp,
+      href: 'https://github.com/yingflower/obsidian-stu-repo-helper/issues'
+    });
+    linkEl.setAttr('target', '_blank'); // 在新标签页打开链接
+
   };
 }

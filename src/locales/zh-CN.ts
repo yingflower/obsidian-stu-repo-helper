@@ -48,6 +48,8 @@ const zh: Record<string, string> = {
   speechVoiceUS: '美式',
   speechVoiceCN: '普通话',
   mtSubscriptionKey: '翻译服务Key',
+  feedback: "用户反馈",
+  feedbackDesp: "提出需求和建议",
 
   // For status bar
   errorHappen: "出错了",

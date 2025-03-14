@@ -49,6 +49,8 @@ const en: Record<string, string> = {
   speechVoiceCN: 'Mandarin',
   speechVoiceUS: 'USA',
   mtSubscriptionKey: 'Translation subscription key',
+  feedback: "User feedback",
+  feedbackDesp: "Requirements and advices",
 
   // For status bar
   errorHappen: "Error happened",
