@@ -76,4 +76,4 @@
 ![绘画作品智能分析](docs/images/zh/painting_analysis.gif)
 
 ### 规划中功能：
-- 知识库内容检索；s
+- 知识库内容检索；

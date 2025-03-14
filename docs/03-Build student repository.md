@@ -43,6 +43,4 @@ This plugin supports the automatic generation of names and descriptions for stud
 
 
 ## Planned Features:
-
 - Retrieval of knowledge repository content;
-- Collection of user feedback. 
