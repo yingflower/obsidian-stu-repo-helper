@@ -2,6 +2,7 @@
 const pluginName = "Student repo";
 const similarTopics = "Similar topics";
 const learningPoints = "Knowledge points";
+const answerQuestion = "Answer question";
 const imageToText = "Image to text";
 const textToSpeech = "Text to speech";
 const translateText = "Translate";
@@ -14,6 +15,7 @@ const en: Record<string, string> = {
   pluginName: `${pluginName}`,
   similarTopics: `${similarTopics}`,
   learningPoints: `${learningPoints}`,
+  answerQuestion: `${answerQuestion}`,
   imageToText: `${imageToText}`,
   textToSpeech: `${textToSpeech}`,
   translateText: `${translateText}`,
@@ -30,6 +32,7 @@ const en: Record<string, string> = {
   syntaxAnalysisMenu: `${pluginName}: ${syntaxAnalysis}`,
   genSimilarTopicsMenu: `${pluginName}: ${similarTopics}`,
   genLearningPointsMenu: `${pluginName}: ${learningPoints}`,
+  answerQuestionMenu: `${pluginName}: ${answerQuestion}`,
   createNodeFromImagesMenu: `${pluginName}: Create note from images`,
   createNodeFromImageMenu: `${pluginName}: Create note from image`,
   paintingAnalysisMenu: `${pluginName}: ${paintingAnalysis}`,

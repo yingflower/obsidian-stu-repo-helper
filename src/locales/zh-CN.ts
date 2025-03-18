@@ -1,6 +1,7 @@
 const pluginName = "学生知识库";
 const similarTopics = "题目扩展";
 const learningPoints = "知识点分析";
+const answerQuestion = "解答";
 const imageToText = "文字识别";
 const textToSpeech = "文字转语音";
 const translateText = "翻译";
@@ -13,6 +14,7 @@ const zh: Record<string, string> = {
   pluginName: `${pluginName}`,
   similarTopics: `${similarTopics}`,
   learningPoints: `${learningPoints}`,
+  answerQuestion: `${answerQuestion}`,
   imageToText: `${imageToText}`,
   textToSpeech: `${textToSpeech}`,
   translateText: `${translateText}`,
@@ -29,6 +31,7 @@ const zh: Record<string, string> = {
   syntaxAnalysisMenu: `${pluginName}: ${syntaxAnalysis}`,
   genSimilarTopicsMenu: `${pluginName}: ${similarTopics}`,
   genLearningPointsMenu: `${pluginName}: ${learningPoints}`,
+  answerQuestionMenu: `${pluginName}: ${answerQuestion}`,
   createNodeFromImagesMenu: `${pluginName}: 从图片生成笔记`,
   createNodeFromImageMenu: `${pluginName}: 从图片生成笔记`,
   paintingAnalysisMenu: `${pluginName}: ${paintingAnalysis}`,

@@ -109,3 +109,16 @@ export const TEXT_TRANSLATE_TEMPLATE = `
 以给定的文本为traditional为例，你的回答应该是：
 传统的
 `;
+
+export const GEN_QUESTION_ANSWER_TEMPLATE = `
+你的任务是解答给定的题目，题目如下:
+{QUESTION}
+
+在生成答案时，请遵循以下指南:
+1. 解答要符合{GRADE}学生的认知能力；
+2. 确保答案简洁易懂，不要出现歧义；
+3. 如果是数学题，请列出算式和运算步骤，每一步控制在50字以内，不要分析过程；
+4. 如果是语文或英语题，请给出关键分析步骤；
+5. 请用{LANGUAGE}回答。
+
+`;  

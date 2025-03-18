@@ -16,6 +16,7 @@ import { checkAccessToken, imageToTextHttp } from "./baidu_ai";
 import { 
   GENERATE_SIMILAR_TOPIC_TEMPLATE,
   GENERATE_LEARNING_POINTS_TEMPLATE,
+  GEN_QUESTION_ANSWER_TEMPLATE,
   GENERATE_WORD_PHONETICS_TEMPLATE,
   SYNTAX_ANALYSIS_TEMPLATE,
   TEXT_TRANSLATE_TEMPLATE
@@ -328,6 +329,26 @@ export default class StudentRepoPlugin extends Plugin {
     }
   }
 
+  async handleAnswerQuestionRequest(question: string, editor: Editor): Promise<void> {
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText(this.trans.thinking);
+    try {
+      const prompt = GEN_QUESTION_ANSWER_TEMPLATE.replace('{QUESTION}', question).replace('{GRADE}', this.settings.stuSettings.grade).replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English');
+
+      const result = await sendLLMRequest(prompt, this.settings.llmSettings);
+      const endOffset = editor.getCursor('to');
+      const nextLinePos = {line: endOffset.line + 1, ch: 0};
+      editor.replaceRange(`${addQuoteToText(result, this.settings.stuSettings.localLanguage === 'zh-Hans'?'解答':'Answer')}\n\n`, nextLinePos);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
+  }
+
   async handlePaintingAnalysisRequest(imageFile: string, editor: Editor): Promise<void> {
     //console.debug(`Image file: ${imageFile}`);
     const file = await this.getLinkedFile(imageFile);
@@ -447,6 +468,15 @@ export default class StudentRepoPlugin extends Plugin {
                 this.handleGenLearningPointRequest(selection, editor);
               });
           })
+          // 解答题目
+          menu.addItem(item => {
+            item
+              .setTitle(this.trans.answerQuestionMenu)
+              .setIcon('document')
+              .onClick(async() => {
+                this.handleAnswerQuestionRequest(selection, editor);
+              });
+          })
         }
 
       })
@@ -536,6 +566,16 @@ export default class StudentRepoPlugin extends Plugin {
           let imageFile = match[1]
           this.handlePaintingAnalysisRequest(imageFile, editor);
         } 
+      }
+    });
+
+    this.addCommand({
+      id: 'answer_question',
+      name: this.trans.answerQuestion,
+      icon: "brain",
+      editorCallback: async (editor: Editor, view: MarkdownView) => {
+        const selection = editor.getSelection();
+        this.handleAnswerQuestionRequest(selection, editor);
       }
     });
 
