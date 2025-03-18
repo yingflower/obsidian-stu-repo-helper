@@ -12,12 +12,13 @@ import {
 import { StudentRepoSettings, DEFAULT_SETTINGS } from './settings';
 import { StudentRepoSettingTab } from './settings';
 import { textToSpeechHttp } from "./ms_azure";
-import { checkAccessToken, imageToTextHttp, translateTextHttp } from "./baidu_ai";
+import { checkAccessToken, imageToTextHttp } from "./baidu_ai";
 import { 
   GENERATE_SIMILAR_TOPIC_TEMPLATE,
   GENERATE_LEARNING_POINTS_TEMPLATE,
   GENERATE_WORD_PHONETICS_TEMPLATE,
-  SYNTAX_ANALYSIS_TEMPLATE
+  SYNTAX_ANALYSIS_TEMPLATE,
+  TEXT_TRANSLATE_TEMPLATE
 } from './prompt'
 
 import { genPaintingAnalysis, sendLLMRequest } from './llm'
@@ -184,17 +185,21 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleTranslateTextRequest(text: string, editor: Editor): Promise<void> {
-    // 使用微软的机器翻译服务
-    //let translatedText = await translateText(text, this.settings.stuSettings.localLanguage, this.settings.mtSettings.subscriptionKey)
-    // 使用百度云提供的机器翻译服务
-    const isUpdate = await checkAccessToken(this.settings.ocrSettings);
-    if (isUpdate) {
-      await this.saveSettings();
-    }
-    let toLang = this.settings.stuSettings.localLanguage === 'zh-Hans' ? 'zh' : 'en';
-    const translatedText = await translateTextHttp(text, toLang, this.settings.ocrSettings)
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText(this.trans.thinking);
+    try {
+      const prompt = TEXT_TRANSLATE_TEMPLATE.replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English').replace('{TEXT', text);
+      const result = await sendLLMRequest(prompt, this.settings.llmSettings);
     const endOffset = editor.getCursor('to');
-    editor.replaceRange(`(${translatedText})`, endOffset);
+      editor.replaceRange(`(${result})`, endOffset);
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
   }
 
   async getWordBankFile(): Promise<AbstractFile> {
@@ -225,7 +230,7 @@ export default class StudentRepoPlugin extends Plugin {
     return wordBankFile;
   }
 
-  async addToWordBank(word: string, phonetics: string, translation: string, source: TFile): Promise<void> {
+  async addToWordBank(text: string, source: TFile): Promise<void> {
     const wordBankFile = await this.getWordBankFile();
     const curDate = getCurrentDate();
   
@@ -246,33 +251,22 @@ export default class StudentRepoPlugin extends Plugin {
       wordStr += `### ${curDate}\n`;
     }
     
-    wordStr += ` - ${word} ${phonetics} ${translation} ([[${source.name}]]) \n`;
+    wordStr += ` - ${text} ([[${source.name}]]) \n`;
     await this.app.vault.modify(wordBankFile, `${wordStr}${content}`);
   }
 
   async handleAddToWordBankRequest(word: string, source: TFile, editor: Editor): Promise<void> {
     const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word);
-    let phonetics = await sendLLMRequest(prompt, this.settings.llmSettings);
-    if (!phonetics.startsWith('/')) {
-      phonetics = `/${phonetics}/`;
-    }
-    //const translatedText = await translateText(word, this.settings.stuSettings.localLanguage, this.settings.mtSettings.subscriptionKey)
-    // 使用百度云提供的机器翻译服务
-    const isUpdate = await checkAccessToken(this.settings.ocrSettings);
-    if (isUpdate) {
-      await this.saveSettings();
-    }
-    let toLang = this.settings.stuSettings.localLanguage === 'zh-Hans' ? 'zh' : 'en';
-    const translatedText = await translateTextHttp(word, toLang, this.settings.ocrSettings)
+    let result = await sendLLMRequest(prompt, this.settings.llmSettings);
     let lastLine = editor.lastLine();
     const lastLineText = editor.getLine(lastLine);
 
     if (lastLineText.startsWith(' - ')) {
-      editor.setLine(lastLine+1, `\n - ${word} ${phonetics} ${translatedText}`);
+      editor.setLine(lastLine+1, `\n - ${result}`);
     } else {
-      editor.setLine(lastLine+1, `\n\n Word Bank \n - ${word} ${phonetics} ${translatedText}`);
+      editor.setLine(lastLine+1, `\n\n Word Bank \n - ${result}`);
     }
-    await this.addToWordBank(word, phonetics, translatedText, source);
+    await this.addToWordBank(result, source);
   }
 
   async handleSyntaxAnalysisRequest(text: string, editor: Editor): Promise<void> {

@@ -1,6 +1,6 @@
 import { requestUrl, arrayBufferToBase64 } from 'obsidian';
 import { LLMSettings } from './settings'
-import { IMAGE_ANALYSIS_TEMPLATE } from './prompt';
+import { PAINTING_ANALYSIS_TEMPLATE } from './prompt';
 
 // 火山引擎大模型配置
 const doubaoSettings: LLMSettings = {
@@ -92,7 +92,7 @@ export async function genPaintingAnalysis(imageBuffer: ArrayBuffer, ext:string, 
           "content": [
             {
               "type": "text",
-              "text": IMAGE_ANALYSIS_TEMPLATE.replace('{LANGUAGE}', lang)
+              "text": PAINTING_ANALYSIS_TEMPLATE.replace('{LANGUAGE}', lang)
             },
             {
               "type": "image_url",

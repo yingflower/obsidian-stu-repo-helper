@@ -40,7 +40,7 @@ const zh: Record<string, string> = {
   studentGrade: `学生年级`,
   localLanguage: '本地语言',
   llmSetting: `大模型(千问/豆包/DeepSeek)`,
-  ocrSetting: '文字识别与翻译',
+  ocrSetting: '文字识别',
   speechSetting: '语音合成',
   speechSubscriptionKey: '语音服务Key',
   speechVoiceType: '语音风格',

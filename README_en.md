@@ -28,7 +28,6 @@ The following are the AI services used in the process of building the knowledge 
 
 - Text recognition: [Baidu Cloud General Text Recognition (High-precision Version)](https://console.bce.baidu.com/ai-engine/ocr/overview/index?_=1740120172878)
 - Speech synthesis: [Microsoft Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
-- Text translation: [Microsoft Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextTranslation)
 
 ## How to Use
 ### Configure the Plugin

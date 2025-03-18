@@ -25,7 +25,6 @@
 [Deepseek](https://platform.deepseek.com/)
 
 - 文字识别：[百度云通用文字识别（高精度版）](https://console.bce.baidu.com/ai-engine/ocr/overview/index?_=1740120172878)
-- 文字翻译：[百度云文本翻译-通用版](https://console.bce.baidu.com/ai-engine/machinetranslation/overview/index)
 - 语音合成：[微软Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
 
 ## 如何使用

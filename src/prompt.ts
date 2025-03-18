@@ -42,13 +42,15 @@ export const GENERATE_LEARNING_POINTS_TEMPLATE = `
 
 
 export const GENERATE_WORD_PHONETICS_TEMPLATE = `
-你的任务是按照要求为给定的词语标注读音：
+你的任务是按照要求为给定的词语标注读音,并将其翻译成{LANGUAGE}：
 {WORD}
 
 在生成音标时,请遵循以下指南:
 1. 如果是英语单词，请使用国际音标符号。
 2. 如果是中文词语，请使用拼音。
-3. 直接给出读音标注，不要多余的话。
+
+以给定的词语为traditional为例，你的回答应该是：
+traditional /trəˈdɪʃənl/ 传统的
 `;
 
 export const SYNTAX_ANALYSIS_TEMPLATE = `
@@ -83,7 +85,7 @@ export const EXPLAIN_KNOWLEDGE_POINT_TEMPLATE = `
 你的答案
 `;
 
-export const IMAGE_ANALYSIS_TEMPLATE = `
+export const PAINTING_ANALYSIS_TEMPLATE = `
 你的任务是对一幅绘画作品进行分析。在分析时，请遵循以下指南:
 在总结绘画内容时，请遵循以下指南：
 1. 识别绘画中的主要元素，如人物、物体、场景等。
@@ -94,4 +96,16 @@ export const IMAGE_ANALYSIS_TEMPLATE = `
 请参照下面的示例的格式给出回答，控制在200字以内：
 ## 《桥上的相遇》
 画中...
+`;
+
+
+export const TEXT_TRANSLATE_TEMPLATE = `
+将给定的文本翻译成{LANGUAGE}：
+{TEXT}
+
+在翻译时，请遵循以下指南：
+1. 如果给定的文本是一个词语，请给出最常用的一种翻译，不要扩展。
+
+以给定的文本为traditional为例，你的回答应该是：
+传统的
 `;

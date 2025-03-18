@@ -41,7 +41,7 @@ const en: Record<string, string> = {
   studentGrade: `Student grade`,
   localLanguage: 'Local language',
   llmSetting: `LLM(Qwen/Doubao/DeepSeek)`,
-  ocrSetting: 'OCR and translation',
+  ocrSetting: 'OCR',
   speechSetting: 'Speech synthesis',
   speechSubscriptionKey: 'Speech subscription key',
   speechVoiceType: 'Speech voice type',
