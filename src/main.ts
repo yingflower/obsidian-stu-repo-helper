@@ -231,7 +231,7 @@ export default class StudentRepoPlugin extends Plugin {
     return wordBankFile;
   }
 
-  async addToWordBank(text: string, source: TFile): Promise<void> {
+  async addToWordBank(text: string, source: TFile, blockId: string): Promise<void> {
     const wordBankFile = await this.getWordBankFile();
     const curDate = getCurrentDate();
   
@@ -252,7 +252,7 @@ export default class StudentRepoPlugin extends Plugin {
       wordStr += `### ${curDate}\n`;
     }
     
-    wordStr += ` - ${text} ([[${source.name}]]) \n`;
+    wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]]) \n`;
     await this.app.vault.modify(wordBankFile, `${wordStr}${content}`);
   }
 
@@ -267,7 +267,16 @@ export default class StudentRepoPlugin extends Plugin {
     } else {
       editor.setLine(lastLine+1, `\n\n Word Bank \n - ${result}`);
     }
-    await this.addToWordBank(result, source);
+    const cursor = editor.getCursor();
+    const currentLine = editor.getLine(cursor.line);
+
+    let blockId = extractBlockId(currentLine);
+    if (!blockId) {
+      blockId = genBlockId();
+      editor.setLine(cursor.line, `${currentLine} ^${blockId}`);
+    } 
+
+    await this.addToWordBank(result, source, blockId);
   }
 
   async handleSyntaxAnalysisRequest(text: string, editor: Editor): Promise<void> {
@@ -726,6 +735,8 @@ function removeMarkdownTags(text: string): string {
   text = text.replace(/<[^>]*>/g, '');
   // 去除文件链接标记
   text = text.replace(/!\[\[.*\]\]/g, '');
+  // 去除块引用标记
+  text = text.replace(/\s*\^\w{5,6}$/, '');
   return text;
 }
 
@@ -735,4 +746,24 @@ function getCurrentDate(): string {
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function extractBlockId(text: string): string | undefined {
+  const blockIdRegex = /\^(\w{5,6})$/;
+  const match = text.match(blockIdRegex);
+  if (match) {
+    return match[1];
+  } else {
+    return undefined;
+  }
+}
+
+function genBlockId(): string {
+  // 生成 6 位随机字母数字字符串
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let blockId = '';
+  for (let i = 0; i < 6; i++) {
+    blockId += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return blockId;
 }
