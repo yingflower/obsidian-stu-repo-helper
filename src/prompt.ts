@@ -121,4 +121,4 @@ export const GEN_QUESTION_ANSWER_TEMPLATE = `
 4. 如果是语文或英语题，请给出关键分析步骤；
 5. 请用{LANGUAGE}回答。
 
-`;  
+`;

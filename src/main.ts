@@ -191,7 +191,7 @@ export default class StudentRepoPlugin extends Plugin {
     try {
       const prompt = TEXT_TRANSLATE_TEMPLATE.replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English').replace('{TEXT', text);
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
-    const endOffset = editor.getCursor('to');
+      const endOffset = editor.getCursor('to');
       editor.replaceRange(`(${result})`, endOffset);
       statusBarItem.setText("");
     } catch (error) {
