@@ -18,16 +18,16 @@ The Student Repository Helper is an Obsidian plugin designed for students or the
 ## AI 服务提供商
 The following are the AI services used in the process of building the knowledge repository and the corresponding account application links. Please apply as needed:
 
-- Large language model: 
+**Large language model**
+- Doubao: [Register introduction](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md#%E5%BC%80%E9%80%9A%E8%B1%86%E5%8C%85%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E8%B4%A6%E5%8F%B7)
+- Deepseek: [Register introduction](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md#%E5%BC%80%E9%80%9Adeepseek%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E8%B4%A6%E5%8F%B7)
+- Alibaba Tongyi Qianwen: [Register introduction](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md#%E5%BC%80%E9%80%9A%E5%8D%83%E9%97%AE%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E8%B4%A6%E5%8F%B7)
 
-[Alibaba Tongyi Qianwen](https://bailian.console.aliyun.com/?apiKey=1#/api-key)
+**Text recognition**
+- Baidu Cloud General Text Recognition (High-precision Version): [Register introduction](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E7%99%BE%E5%BA%A6%E4%BA%91%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md)
 
-[Doubao](https://console.volcengine.com/ark/)
-
-[Deepseek](https://platform.deepseek.com/)
-
-- Text recognition: [Baidu Cloud General Text Recognition (High-precision Version)](https://console.bce.baidu.com/ai-engine/ocr/overview/index?_=1740120172878)
-- Speech synthesis: [Microsoft Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
+**Speech synthesis** 
+- Microsoft Azure: [Register introduction](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%BE%AE%E8%BD%AFAzure%E8%AF%AD%E9%9F%B3%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md)
 
 ## How to Use
 ### Configure the Plugin

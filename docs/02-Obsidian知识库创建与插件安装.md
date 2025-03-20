@@ -85,36 +85,32 @@ Remotely Save这款插件能帮助我们实现多端实时共享。它通过智�
 ### Remotely Save 配置
 Remotely Save 这个插件是用来实现多端实时共享的，它依赖一个远程存储服务，这里我们以支持WebDAV的InfiniCLOUD为例，向大家介绍如何申请InfiniCLOUD的账号和获取access key。选用InfiniCLOUD是因为它可以免费给每个账户提供至少25G的存储空间，以一个人正常学习过程中一年产生1G数据的速度来讲，25G可以用25年，足够满足我们日常学习的需求。
 
-- 参照《开通InfiniCLOUD WebDAV服务指南》，注册并开通InfiniCLOUD WebDAV服务。
+- 参照[开通InfiniCLOUD WebDAV服务指南](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9AInfiniCLOUD%20WebDAV%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md)，注册并开通InfiniCLOUD WebDAV服务。
 - 配置Remotely Save：打开Obsidian，到设置中的第三方插件中，启用Remotely Save，点击插件的设置，将上一步保存的WebDAV配置信息填入。
 
 ![配置Remotely Save](images/zh/config_remotely_save.png)
 
 ### Student Repository Helper 配置
-
-- AI服务账号申请
+#### AI服务账号申请
 
 知识库搭建过程中会用到的一些AI服务，其对应的账号申请链接如下，请大家按需申请：
 
-**大语言模型：** 
+**大语言模型** ：
+- 字节豆包：[开通指南](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md#%E5%BC%80%E9%80%9A%E8%B1%86%E5%8C%85%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E8%B4%A6%E5%8F%B7)
+- Deepseek：[开通指南](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md#%E5%BC%80%E9%80%9Adeepseek%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E8%B4%A6%E5%8F%B7)
+- 阿里通义千问：[开通指南](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md#%E5%BC%80%E9%80%9A%E5%8D%83%E9%97%AE%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E8%B4%A6%E5%8F%B7)
 
-[阿里通义千问](https://bailian.console.aliyun.com/?apiKey=1#/api-key)
+**文字识别**：
+- 百度云通用文字识别（高精度版）：[开通指南](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E7%99%BE%E5%BA%A6%E4%BA%91%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md)
 
-[字节豆包](https://console.volcengine.com/ark/)
+**语音合成**：
+- 微软Azure：[开通指南](https://github.com/yingflower/obsidian-stu-repo-helper/blob/master/docs/%E5%BC%80%E9%80%9A%E5%BE%AE%E8%BD%AFAzure%E8%AF%AD%E9%9F%B3%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%8D%97.md)
 
-[Deepseek](https://platform.deepseek.com/)
-
-**文字识别：**[百度云通用文字识别（高精度版）](https://console.bce.baidu.com/ai-engine/ocr/overview/index?_=1740120172878)
-
-**文字翻译：**[百度云文本翻译-通用版](https://console.bce.baidu.com/ai-engine/machinetranslation/overview/index)
-
-**语音合成：**[微软Azure](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
-
-- 插件配置
+#### 插件配置
 打开Obsidian，到设置中的第三方插件中，启用Student Repo，点击插件的设置，输入你的 AI 服务提供商的账号信息，示例如下图：
 
 ![插件设置](images/zh/settings.png)
 
-**注意：** 如果你需要使用绘画分析的功能，那么需要申请并配置一个支持多模态的大模型。否则只需要配置一个支持文本的大模型即可。
+**注意**： 如果你需要使用绘画分析的功能，那么需要申请并配置一个支持多模态的大模型。否则只需要配置一个支持文本的大模型即可。
 
 至此，学生知识库必备插件就安装配置完成。接下来我们就可以开始按照自己的需求来构建学生知识库了。
