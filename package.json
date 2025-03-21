@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-stu-repo-helper",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "This is a Student Repository Helper for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
