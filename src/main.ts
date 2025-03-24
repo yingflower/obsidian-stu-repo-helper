@@ -239,21 +239,33 @@ export default class StudentRepoPlugin extends Plugin {
     let wordStr = '';
     // 判断是否是当天的单词, 增加空文件判断
     const lines = content.split('\n');
-    const lastLine = lines[0];
-    if (lastLine.startsWith('###')) {
-      const lastDate = lastLine.split('###')[1].trim();
-      if (lastDate !== curDate) {
-        wordStr += `### ${curDate}\n`;
-      } else {
-        wordStr += `${lastLine}\n`;
-        content = content.substring(lastLine.length + 1);
+
+    let lastDate = '';
+    let strimLength = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      if (line.startsWith('###')) {
+        if (lastDate.length == 0) {
+          lastDate = line.split('###')[1].trim();
+          if (lastDate !== curDate) {
+            wordStr += `### ${curDate}\n`;
+            wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]]) \n`;
+            break;
+          }
+        } else {
+          wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]]) \n`;
+          break;
+        }
       }
-    } else {
-      wordStr += `### ${curDate}\n`;
+      wordStr += `${line}\n`;
+      strimLength += line.length + 1;
     }
-    
-    wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]]) \n`;
-    await this.app.vault.modify(wordBankFile, `${wordStr}${content}`);
+
+    content = content.substring(strimLength);
+    wordStr += content;
+
+    await this.app.vault.modify(wordBankFile, `${wordStr}`);
   }
 
   async handleAddToWordBankRequest(word: string, source: TFile, editor: Editor): Promise<void> {
