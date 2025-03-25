@@ -42,12 +42,13 @@ export const GENERATE_LEARNING_POINTS_TEMPLATE = `
 
 
 export const GENERATE_WORD_PHONETICS_TEMPLATE = `
-你的任务是按照要求为给定的词语标注读音,并将其翻译成{LANGUAGE}：
-{WORD}
+你的任务是按照要求为给定的词语标注读音，并给出其在特定上下文中的{LANGUAGE}释义：
+词语：{WORD}
+包含该词语的上下文：{CONTEXT}
 
-在生成音标时,请遵循以下指南:
-1. 如果是英语单词，请使用国际音标符号。
-2. 如果是中文词语，请使用拼音。
+请遵循以下指南:
+1. 在注音时，如果是英语单词，请使用国际音标符号，如果是中文词语，请使用拼音。
+2. 在释义时，请直接给出释义，不要解释为什么是这个释义。
 
 以给定的词语为traditional为例，你的回答应该是：
 traditional /trəˈdɪʃənl/ 传统的
@@ -100,11 +101,12 @@ export const PAINTING_ANALYSIS_TEMPLATE = `
 
 
 export const TEXT_TRANSLATE_TEMPLATE = `
-将给定的文本翻译成{LANGUAGE}：
-{TEXT}
+你的任务是给出指定文本在特定上下文中的{LANGUAGE}释义：
+文本：{TEXT}
+包含该文本的上下文：{CONTEXT}
 
-在翻译时，请遵循以下指南：
-1. 如果给定的文本是一个词语，请给出最常用的一种翻译，不要扩展。
+请遵循以下指南:
+1. 在释义时，请直接给出释义，不要解释为什么是这个释义。
 
 以给定的文本为traditional为例，你的回答应该是：
 传统的

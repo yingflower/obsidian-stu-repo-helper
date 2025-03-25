@@ -189,7 +189,7 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.thinking);
     try {
-      const prompt = TEXT_TRANSLATE_TEMPLATE.replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English').replace('{TEXT', text);
+      const prompt = TEXT_TRANSLATE_TEMPLATE.replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English').replace('{TEXT', text).replace('{CONTEXT}', getCurrentContext(editor));
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
       const endOffset = editor.getCursor('to');
       editor.replaceRange(`(${result})`, endOffset);
@@ -269,7 +269,7 @@ export default class StudentRepoPlugin extends Plugin {
   }
 
   async handleAddToWordBankRequest(word: string, source: TFile, editor: Editor): Promise<void> {
-    const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word);
+    const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word).replace('{CONTEXT}', getCurrentContext(editor)).replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English');
     let result = await sendLLMRequest(prompt, this.settings.llmSettings);
     let lastLine = editor.lastLine();
     const lastLineText = editor.getLine(lastLine);
@@ -778,4 +778,44 @@ function genBlockId(): string {
     blockId += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return blockId;
+}
+
+function getCurrentContext(editor: Editor): string {
+
+  function getEndingPos(lineText: string, cursorPos: number, direction: 'left' | 'right'): number {
+      const sentenceEndings = ['.', '!', '?', '。', '！', '？'];
+      
+      if (direction === 'left') {
+        let start = 0;
+        for (let i = cursorPos - 1; i >= 0; i--) {
+            if (sentenceEndings.includes(lineText[i])) {
+                start = i + 1;
+                break;
+            }
+        }
+        return start;
+      } else {
+        let end = lineText.length;
+        for (let i = cursorPos; i < lineText.length; i++) {
+            if (sentenceEndings.includes(lineText[i])) {
+                end = i + 1;
+                break;
+            }
+        }
+        return end;
+      }
+  }
+  const from = editor.getCursor('from');
+  const to = editor.getCursor('to');
+
+  if (from.line !== to.line) {
+    return '';
+  } 
+  const cursor = editor.getCursor();
+  const lineText = editor.getLine(cursor.line);
+  if (!lineText) return '';
+
+  const start = getEndingPos(lineText, from.ch, 'left');
+  const end = getEndingPos(lineText, to.ch, 'right');
+  return lineText.slice(start, end).trim();
 }
