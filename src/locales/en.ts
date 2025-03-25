@@ -54,6 +54,7 @@ const en: Record<string, string> = {
   mtSubscriptionKey: 'Translation subscription key',
   feedback: "User feedback",
   feedbackDesp: "Requirements and advices",
+  donateMe: "Donate to author",
 
   // For status bar
   errorHappen: "Error happened",
