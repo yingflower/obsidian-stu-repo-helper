@@ -653,22 +653,6 @@ export default class StudentRepoPlugin extends Plugin {
   }
 }
 
-function getFirstFiveWords(text: string): string {
-  // 使用正则表达式匹配单词，\b 表示单词边界，\w+ 表示一个或多个字母、数字或下划线
-  const words = text.match(/\b\w+\b/g);
-  if (!words) {
-      return '';
-  }
-  // 如果单词数量少于 5 个，返回所有单词；否则返回前 5 个单词
-  const selectedWords = words.length < 5 ? words : words.slice(0, 5);
-  // 将选中的单词数组用空格连接成一个字符串
-  return selectedWords.join(' ');
-}
-
-function isFileMarkdown(path: string): boolean {
-  return path.endsWith('.md')
-}
-
 function isFileImage(path: string): boolean {
   return (
     path.endsWith('.png') || path.endsWith('.jpg') || path.endsWith('.jpeg') ||
