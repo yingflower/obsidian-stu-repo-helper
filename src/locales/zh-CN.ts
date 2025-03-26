@@ -53,7 +53,7 @@ const zh: Record<string, string> = {
   mtSubscriptionKey: '翻译服务Key',
   feedback: "用户反馈",
   feedbackDesp: "提出需求和建议",
-  donateMe: "支持作者",
+  donateMe: "赞助一杯咖啡给作者",
 
   // For status bar
   errorHappen: "出错了",
