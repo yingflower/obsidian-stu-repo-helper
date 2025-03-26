@@ -732,7 +732,7 @@ function removeMarkdownTags(text: string): string {
   // 去除文件链接标记
   text = text.replace(/!\[\[.*\]\]/g, '');
   // 去除块引用标记
-  text = text.replace(/\s*\^\w{5,6}$/, '');
+  text = text.replace(/\^\w{5,6}$/gm, '');
   return text;
 }
 
