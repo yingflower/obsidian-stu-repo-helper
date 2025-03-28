@@ -212,17 +212,16 @@ export default class StudentRepoPlugin extends Plugin {
     if (!wordBankFile) {
       // Find word bank file
       const files = this.app.vault.getFiles();
-      console.debug(`Files: ${files.length}`);
       for (const file of files) {
         if (file.name === 'Word Bank.md') {
-          console.debug(`Word Bank file found: ${file.path}`);
+          //console.debug(`Word Bank file found: ${file.path}`);
           wordBankFile = file;
           break;
         }
       }
       // Create word bank file
       if (!wordBankFile) {
-        console.debug(`Word Bank file not found, create it`);
+        //console.debug(`Word Bank file not found, create it`);
         wordBankFile = await createNote('Word Bank', '', false);
       }
       this.settings.stuSettings.wordBankFile = wordBankFile.path;
@@ -237,7 +236,6 @@ export default class StudentRepoPlugin extends Plugin {
   
     let content = await this.app.vault.read(wordBankFile);
     let wordStr = '';
-    // 判断是否是当天的单词, 增加空文件判断
     const lines = content.split('\n');
 
     let lastDate = '';
@@ -258,12 +256,19 @@ export default class StudentRepoPlugin extends Plugin {
           break;
         }
       }
+
+      if (i == lines.length - 1) {
+        if (lastDate.length == 0) {
+          wordStr += `### ${curDate}\n`;
+        }
+        wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]])`;
+      }
       wordStr += `${line}\n`;
       strimLength += line.length + 1;
     }
 
     content = content.substring(strimLength);
-    wordStr += content;
+    wordStr += content.trim();
 
     await this.app.vault.modify(wordBankFile, `${wordStr}`);
   }
@@ -285,7 +290,7 @@ export default class StudentRepoPlugin extends Plugin {
     let blockId = extractBlockId(currentLine);
     if (!blockId) {
       blockId = genBlockId();
-      editor.setLine(cursor.line, `${currentLine} ^${blockId}`);
+      editor.setLine(cursor.line, `${currentLine} ^${blockId}\n`);
     } 
 
     await this.addToWordBank(result, source, blockId);
@@ -671,7 +676,7 @@ function isImageFiles(files: TFile[]): boolean {
 }
 
 async function createNote(name: string, contents = '', openInNewTab = true): Promise<TFile | null> {
-  console.debug(`Create note: ${name}`);
+  //console.debug(`Create note: ${name}`);
   try {
     let pathPrefix: string = this.app.fileManager.getNewFileParent('').path
   
