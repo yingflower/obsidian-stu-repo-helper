@@ -94,53 +94,9 @@ he Student Repository Helper is an Obsidian plugin aimed at students or parents 
 The Remotely Save plugin can help us achieve real - time sharing across multiple devices. It synchronizes local and cloud notes through intelligent conflict handling: supporting S3 (such as Amazon S3/Cloudflare R2/Backblaze B2, etc.), Dropbox, WebDAV (NextCloud/InfiniCLOUD/Synology, etc.), OneDrive, Google Drive (GDrive), Box, pCloud, Yandex Disk, Koofr, Azure Blob Storage. 
 
 ## Install the plugin
-There are two installation methods: the official Obsidian plugin market and manual installation. Below, take the Student Repository Helper as an example to show you how to install Obsidian plugins. 
-### Install from the official plugin market
-First, it is necessary to ensure that the official Obsidian plugin market can be accessed. At this time, plugins can be directly installed using the plugin market, as shown in the following figure: 
+Obsidian plugins can be directly installed from the plugin market, as shown in the following figure: 
 
 ![安装插件](images/zh/install_plugin.gif) 
-
-### Manual installation
-Since domestic users cannot directly access the official Obsidian plugin market, they need to first download the installation package from the plugin's GitHub address and then install it manually. 
-- Step 1: Download the plugin package
-
-Open the plugin [GitHub address](https://github.com/yingflower/obsidian-stu-repo-helper), and then download the latest - version plugin files: main.js, manifest.json, and styles.css from the Release section at the bottom - right. 
-
-![下载插件](images/zh/download_plugin.png)
-
-- Step 2: Install the plugin
-Create a "plugins" folder in the ".obsidian" folder of the knowledge - base you just created (ignore it if the directory already exists). Then create a "stu - repo - helper" folder under the "plugins" directory. Finally, put the three files downloaded in the first step into the "stu - repo - helper" directory. The completed ".obsidian" directory structure is as follows: 
-```shell
-.
-├── app.json
-├── appearance.json
-├── community-plugins.json
-├── core-plugins.json
-├── graph.json
-├── plugins
-│   └── stu-repo-helper
-│       ├── main.js
-│       ├── manifest.json
-│       └── styles.css
-└── workspace.json
-```
-After completion, restart Obsidian. Then, in the third - party plugins section of the settings, enable Student Repo to start using it. 
-
-按照同样的步骤安装Remotely Save。全部安装成功后的plugins目录结构如下：
-```shell
-.
-├── remotely-save
-│   ├── data.json
-│   ├── main.js
-│   ├── manifest.json
-│   └── styles.css
-└── stu-repo-helper
-    ├── data.json
-    ├── main.js
-    ├── manifest.json
-    └── styles.css
-```
-其中remotely-save和stu-repo-helper是插件目录下的data.json文件是插件的配置文件。
 
 ## Plugin Configuration
 ### Remotely Save Configuration
