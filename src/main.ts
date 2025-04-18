@@ -279,6 +279,7 @@ export default class StudentRepoPlugin extends Plugin {
     let lastLine = editor.lastLine();
     const lastLineText = editor.getLine(lastLine);
 
+    editor.replaceSelection(`***${word}***`);
     if (lastLineText.startsWith(' - ')) {
       editor.setLine(lastLine+1, `\n - ${result}`);
     } else {
