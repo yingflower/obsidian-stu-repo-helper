@@ -19,7 +19,8 @@ import {
   GEN_QUESTION_ANSWER_TEMPLATE,
   GENERATE_WORD_PHONETICS_TEMPLATE,
   SYNTAX_ANALYSIS_TEMPLATE,
-  TEXT_TRANSLATE_TEMPLATE
+  TEXT_TRANSLATE_TEMPLATE,
+  READING_ANALYSIS_TEMPLATE
 } from './prompt'
 
 import { genPaintingAnalysis, sendLLMRequest } from './llm'
@@ -50,16 +51,14 @@ export default class StudentRepoPlugin extends Plugin {
 			this.app.workspace.on('files-menu', (menu, files) => {
         let isImages = isImageFiles(files)
         if (isImages) {
-          if (isImages) {
-            menu.addItem((item) => {
-              item.setTitle(this.trans.createNodeFromImagesMenu)
-              .setIcon('document')
-              .onClick(async() => {
-                console.debug('Create note from images');
-                await createImagesNote(files)
-              });
+          menu.addItem((item) => {
+            item.setTitle(this.trans.createNodeFromImagesMenu)
+            .setIcon('document')
+            .onClick(async() => {
+              console.debug('Create note from images');
+              await createImagesNote(files)
             });
-          }
+          });
         }
       })
     );
@@ -122,8 +121,6 @@ export default class StudentRepoPlugin extends Plugin {
           await this.saveSettings();
         }
         const text = await imageToTextHttp(imageBuffer, this.settings.ocrSettings)
-        // 使用微软提供的ocr服务
-        //const text = await imageToText(imageBuffer, "tcI94DxwkS5q7eX9QjKsjtWsUNgu60m8BjpTmnVcx04nQdau7QdXJQQJ99BBAC3pKaRXJ3w3AAAFACOG2RC2")
         if (line < 0) {
           line = editor.getCursor().line + 1;
         }
@@ -189,7 +186,7 @@ export default class StudentRepoPlugin extends Plugin {
     const statusBarItem = this.addStatusBarItem();
     statusBarItem.setText(this.trans.thinking);
     try {
-      const prompt = TEXT_TRANSLATE_TEMPLATE.replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English').replace('{TEXT', text).replace('{CONTEXT}', getCurrentContext(editor));
+      const prompt = TEXT_TRANSLATE_TEMPLATE.replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English').replace('{TEXT}', text).replace('{CONTEXT}', getCurrentContext(editor));
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
       const endOffset = editor.getCursor('to');
       editor.replaceRange(`(${result})`, endOffset);
@@ -203,8 +200,8 @@ export default class StudentRepoPlugin extends Plugin {
     }
   }
 
-  async getWordBankFile(): Promise<AbstractFile> {
-    let wordBankFile: AbstractFile = null
+  async getWordBankFile(): Promise<TFile> {
+    let wordBankFile: TFile = null
     if (this.settings.stuSettings.wordBankFile) {
       wordBankFile = this.app.vault.getAbstractFileByPath(this.settings.stuSettings.wordBankFile);
     }
@@ -376,6 +373,50 @@ export default class StudentRepoPlugin extends Plugin {
     }
   }
 
+  async handleReadingAnalysisRequest(selection: string, editor: Editor): Promise<void> {
+    const statusBarItem = this.addStatusBarItem();
+    statusBarItem.setText(this.trans.thinking);
+    try {
+      const content = selection;
+      const readingTitles = this.isLangZh
+        ? ['阅读文本', '阅读材料', '文章']
+        : ['Reading text', 'Reading material', 'Passage', 'Article'];
+      const answerTitles = this.isLangZh
+        ? ['学生作答', '作答', '答案', '学生答案']
+        : ['Student answer', 'Answer', 'Student response'];
+
+      const readingText = extractSectionByTitle(content, readingTitles);
+      const studentAnswer = extractSectionByTitle(content, answerTitles);
+
+      if (!readingText || !studentAnswer) {
+        new Notice(
+          this.isLangZh
+            ? '未在选中内容中找到"阅读文本"和"学生作答"对应的标题，请用 ## 标题标注这两部分内容后再选中。'
+            : 'Could not find "Reading text" and "Student answer" sections in the selection. Please mark them with ## headings before selecting.'
+        );
+        statusBarItem.setText("");
+        return;
+      }
+
+      const prompt = READING_ANALYSIS_TEMPLATE
+        .replace('{阅读文本}', readingText)
+        .replace('{学生作答}', studentAnswer);
+
+      const result = await sendLLMRequest(prompt, this.settings.llmSettings);
+      const endOffset = editor.getCursor('to');
+      const nextLinePos = {line: endOffset.line + 1, ch: 0};
+      editor.replaceRange(`${addQuoteToText(result, this.isLangZh ? '阅读理解分析' : 'Reading analysis')}\n\n`, nextLinePos);
+      editor.scrollIntoView({from: nextLinePos, to: {line: endOffset.line + 20, ch: 0}});
+      statusBarItem.setText("");
+    } catch (error) {
+      console.error(error);
+      statusBarItem.setText(this.trans.errorHappen + error.message);
+      setTimeout(() => {
+          statusBarItem.setText("");
+      }, 5000);
+    }
+  }
+
   async handlePaintingAnalysisRequest(imageFile: string, editor: Editor): Promise<void> {
     //console.debug(`Image file: ${imageFile}`);
     const file = await this.getLinkedFile(imageFile);
@@ -504,6 +545,15 @@ export default class StudentRepoPlugin extends Plugin {
                 this.handleAnswerQuestionRequest(selection, editor);
               });
           })
+          // 阅读理解分析
+          menu.addItem(item => {
+            item
+              .setTitle(this.trans.readingAnalysisMenu)
+              .setIcon('document')
+              .onClick(async() => {
+                this.handleReadingAnalysisRequest(selection, editor);
+              });
+          })
         }
 
       })
@@ -603,6 +653,16 @@ export default class StudentRepoPlugin extends Plugin {
       editorCallback: async (editor: Editor, view: MarkdownView) => {
         const selection = editor.getSelection();
         this.handleAnswerQuestionRequest(selection, editor);
+      }
+    });
+
+    this.addCommand({
+      id: 'reading_analysis',
+      name: this.trans.readingAnalysis,
+      icon: "book-open",
+      editorCallback: async (editor: Editor, view: MarkdownView) => {
+        const selection = editor.getSelection();
+        this.handleReadingAnalysisRequest(selection, editor);
       }
     });
 
@@ -808,4 +868,39 @@ function getCurrentContext(editor: Editor): string {
   const start = getEndingPos(lineText, from.ch, 'left');
   const end = getEndingPos(lineText, to.ch, 'right');
   return lineText.slice(start, end).trim();
+}
+
+function extractSectionByTitle(content: string, possibleTitles: string[]): string | null {
+  const lines = content.split('\n');
+  let startLine = -1;
+  let endLine = -1;
+  let startLevel = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (!headingMatch) continue;
+
+    const level = headingMatch[1].length;
+    const title = headingMatch[2].trim();
+
+    if (startLine === -1) {
+      if (possibleTitles.some(t => title === t)) {
+        startLine = i + 1;
+        startLevel = level;
+      }
+    } else {
+      if (level <= startLevel) {
+        endLine = i;
+        break;
+      }
+    }
+  }
+
+  if (startLine === -1) return null;
+  if (endLine === -1) endLine = lines.length;
+
+  const sectionLines = lines.slice(startLine, endLine);
+  const result = sectionLines.join('\n').trim();
+  return result || null;
 }

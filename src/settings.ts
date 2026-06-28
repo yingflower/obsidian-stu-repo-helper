@@ -53,7 +53,7 @@ export const DEFAULT_SETTINGS: StudentRepoSettings = {
   speechSettings: {
     subscriptionKey: '',
     speechLanguage: 'en',
-    speechVoice: 'en-GB-SoniaNeural',
+    speechVoice: 'en-GB-OllieMultilingualNeural',
     speechOutputPath: '_audios',
   },
   ocrSettings: {
@@ -194,7 +194,8 @@ export class StudentRepoSettingTab extends PluginSettingTab {
       .setName(this.plugin.trans.speechVoiceType)
       .setDesc('Speech voice type')
       .addDropdown((dropdown) => {
-        dropdown.addOption('en-GB-SoniaNeural', this.plugin.trans.speechVoiceGB);
+        //dropdown.addOption('en-GB-SoniaNeural', this.plugin.trans.speechVoiceGB);
+        dropdown.addOption('en-GB-OllieMultilingualNeural', this.plugin.trans.speechVoiceGB);
         dropdown.addOption('en-US-AmandaMultilingualNeural', this.plugin.trans.speechVoiceUS);
         dropdown.addOption('zh-CN-XiaoxiaoNeural', this.plugin.trans.speechVoiceCN);
         dropdown.setValue(this.plugin.settings.speechSettings.speechVoice);

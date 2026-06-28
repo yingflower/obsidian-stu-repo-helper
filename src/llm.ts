@@ -28,7 +28,7 @@ export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): 
   try {
     const body = {
       "model": llmSettings.modelName,
-      "tempreture": 1,
+      "temperature": 1,
       "messages": [
         {
           "role": "system",

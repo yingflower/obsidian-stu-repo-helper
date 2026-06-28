@@ -9,6 +9,7 @@ const translateText = "Translate";
 const addWordBank = "Add to word bank";
 const syntaxAnalysis = "Syntax analysis";
 const paintingAnalysis = "Painting analysis";
+const readingAnalysis = "Reading analysis";
 
 const en: Record<string, string> = {
   // For command name
@@ -23,6 +24,7 @@ const en: Record<string, string> = {
   syntaxAnalysis: `${syntaxAnalysis}`,
   analysisAndSummarize: `Analyze & summarize`,
   paintingAnalysis: `${paintingAnalysis}`,
+  readingAnalysis: `${readingAnalysis}`,
 
   // For menu
   imageToTextMenu: `${pluginName}: ${imageToText}`,
@@ -36,6 +38,7 @@ const en: Record<string, string> = {
   createNodeFromImagesMenu: `${pluginName}: Create note from images`,
   createNodeFromImageMenu: `${pluginName}: Create note from image`,
   paintingAnalysisMenu: `${pluginName}: ${paintingAnalysis}`,
+  readingAnalysisMenu: `${pluginName}: ${readingAnalysis}`,
 
   // For settings
   llmProvider: "Alibaba Qwen",

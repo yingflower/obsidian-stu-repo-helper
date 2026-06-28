@@ -8,6 +8,7 @@ const translateText = "翻译";
 const addWordBank = "加单词库";
 const syntaxAnalysis = "语法分析";
 const paintingAnalysis = "绘画分析";
+const readingAnalysis = "阅读理解分析";
 
 const zh: Record<string, string> = {
   // For command name
@@ -22,6 +23,7 @@ const zh: Record<string, string> = {
   syntaxAnalysis: `${syntaxAnalysis}`,
   analysisAndSummarize: `分析&扩展`,
   paintingAnalysis: `${paintingAnalysis}`,
+  readingAnalysis: `${readingAnalysis}`,
 
   // For menu name
   imageToTextMenu: `${pluginName}: ${imageToText}`,
@@ -35,6 +37,7 @@ const zh: Record<string, string> = {
   createNodeFromImagesMenu: `${pluginName}: 从图片生成笔记`,
   createNodeFromImageMenu: `${pluginName}: 从图片生成笔记`,
   paintingAnalysisMenu: `${pluginName}: ${paintingAnalysis}`,
+  readingAnalysisMenu: `${pluginName}: ${readingAnalysis}`,
 
   // For settings
   llmProvider: "阿里千问",
