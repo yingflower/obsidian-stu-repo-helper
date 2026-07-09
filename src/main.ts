@@ -384,9 +384,13 @@ export default class StudentRepoPlugin extends Plugin {
       const answerTitles = this.isLangZh
         ? ['学生作答', '作答', '答案', '学生答案']
         : ['Student answer', 'Answer', 'Student response'];
+      const refAnswerTitles = this.isLangZh
+        ? ['参考答案', '标准答案', '答案']
+        : ['Reference answer', 'Standard answer', 'Answer key'];
 
       const readingText = extractSectionByTitle(content, readingTitles);
       const studentAnswer = extractSectionByTitle(content, answerTitles);
+      const referenceAnswer = extractSectionByTitle(content, refAnswerTitles);
 
       if (!readingText || !studentAnswer) {
         new Notice(
@@ -400,13 +404,15 @@ export default class StudentRepoPlugin extends Plugin {
 
       const prompt = READING_ANALYSIS_TEMPLATE
         .replace('{阅读文本}', readingText)
-        .replace('{学生作答}', studentAnswer);
+        .replace('{学生作答}', studentAnswer)
+        .replace('{参考答案}', referenceAnswer || '');
 
       const result = await sendLLMRequest(prompt, this.settings.llmSettings);
-      const endOffset = editor.getCursor('to');
-      const nextLinePos = {line: endOffset.line + 1, ch: 0};
-      editor.replaceRange(`${addQuoteToText(result, this.isLangZh ? '阅读理解分析' : 'Reading analysis')}\n\n`, nextLinePos);
-      editor.scrollIntoView({from: nextLinePos, to: {line: endOffset.line + 20, ch: 0}});
+      const lastLine = editor.lastLine();
+      const lastLineLength = editor.getLine(lastLine).length;
+      const endPos = {line: lastLine, ch: lastLineLength};
+      editor.replaceRange(`\n\n## 阅读分析\n\n${addQuoteToText(result, this.isLangZh ? '阅读理解分析' : 'Reading analysis')}\n`, endPos);
+      editor.scrollIntoView({from: {line: lastLine + 5, ch: 0}, to: {line: lastLine + 20, ch: 0}});
       statusBarItem.setText("");
     } catch (error) {
       console.error(error);
@@ -661,8 +667,8 @@ export default class StudentRepoPlugin extends Plugin {
       name: this.trans.readingAnalysis,
       icon: "book-open",
       editorCallback: async (editor: Editor, view: MarkdownView) => {
-        const selection = editor.getSelection();
-        this.handleReadingAnalysisRequest(selection, editor);
+        const fullContent = editor.getValue();
+        this.handleReadingAnalysisRequest(fullContent, editor);
       }
     });
 
