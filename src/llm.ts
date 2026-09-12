@@ -38,7 +38,9 @@ export async function sendLLMRequest(prompt: string, llmSettings: LLMSettings): 
           "role": "user",
           "content": prompt
         }
-      ]
+      ],
+      "thinking": {"type": "disabled"},
+      "enable_thinking": false
     };
     const jsonBody = JSON.stringify(body);
 
@@ -102,7 +104,9 @@ export async function genPaintingAnalysis(imageBuffer: ArrayBuffer, ext:string, 
             }
           ]
         }
-      ]
+      ],
+      "thinking": {"type": "disabled"},
+      "enable_thinking": false
     };
     const jsonBody = JSON.stringify(body);
 
