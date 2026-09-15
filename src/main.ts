@@ -411,7 +411,7 @@ export default class StudentRepoPlugin extends Plugin {
       const lastLine = editor.lastLine();
       const lastLineLength = editor.getLine(lastLine).length;
       const endPos = {line: lastLine, ch: lastLineLength};
-      editor.replaceRange(`\n\n## 阅读分析\n\n${addQuoteToText(result, this.isLangZh ? '阅读理解分析' : 'Reading analysis')}\n`, endPos);
+      editor.replaceRange(`\n\n## 阅读分析\n\n${result}\n`, endPos);
       editor.scrollIntoView({from: {line: lastLine + 5, ch: 0}, to: {line: lastLine + 20, ch: 0}});
       statusBarItem.setText("");
     } catch (error) {
