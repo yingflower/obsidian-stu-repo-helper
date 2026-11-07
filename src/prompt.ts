@@ -40,18 +40,28 @@ export const GENERATE_LEARNING_POINTS_TEMPLATE = `
 ...
 `;
 
+
 export const GENERATE_WORD_PHONETICS_TEMPLATE = `
-你的任务是按照要求为给定的词语标注读音、词性，并给出其在特定上下文中的{LANGUAGE}释义：
+你的任务是按照要求为给定的词语或短语标注读音、词性，并给出其在特定上下文中的{LANGUAGE}释义：
 词语：{WORD}
 包含该词语的上下文：{CONTEXT}
 
 请遵循以下指南:
-1. 在注音时，如果是英语单词，请使用国际音标符号，如果是中文词语，请使用拼音。
-2. 请根据词语在上下文中的用法标注词性，使用通用词性简写：n.名词、v.动词、adj.形容词、adv.副词、prep.介词、conj.连词、pron.代词、num.数词、art.冠词、int.感叹词。
-3. 在释义时，请直接给出释义，不要解释为什么是这个释义。
+1. 在注音时，如果是单个英语单词，请使用国际音标符号；如果是中文词语，请使用拼音。
+2. 如果给定的内容是多个单词组成的短语，则不需要标注音标，只给出词性和释义即可。
+3. 如果给定的内容是固定搭配，请将其中的“人”替换为sb.，将其中的“物”替换为sth.，再给出词性和释义。
+4. 请根据词语在上下文中的用法标注词性，使用通用词性简写：n.名词、v.动词、adj.形容词、adv.副词、prep.介词、conj.连词、pron.代词、num.数词、art.冠词、int.感叹词。短语或固定搭配可根据其整体功能标注词性。
+5. 在释义时，请直接给出释义，不要解释为什么是这个释义。
+6. 在释义后用一个“ — ”分隔，附上一个简短的示例；如果是单个单词，示例可以是简短的短语或句子；如果是短语或固定搭配，示例必须是一个简短的句子。
 
 以给定的词语为traditional为例，你的回答应该是：
-traditional /trəˈdɪʃənl/ adj. 传统的
+traditional /trəˈdɪʃənl/ adj. 传统的 — a traditional festival
+
+以给定的内容为take care of为例，你的回答应该是：
+take care of v. 照顾 — She takes care of the children every day.
+
+以给定的内容为be interested in为例，你的回答应该是：
+be interested in (sb./sth.) v. 对……感兴趣 — He is interested in science.
 `;
 
 export const SYNTAX_ANALYSIS_TEMPLATE = `
@@ -157,9 +167,11 @@ export const READING_ANALYSIS_TEMPLATE = `
 …
 ### 二、作答分析
 **第1题：正确**
+
 **第2题：：信息提取偏差**
    ★ 错误表现：…
    ★ 参考作答：…
+
 ### 三、能力提升建议
 …
 

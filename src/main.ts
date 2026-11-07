@@ -230,48 +230,72 @@ export default class StudentRepoPlugin extends Plugin {
   async addToWordBank(text: string, source: TFile, blockId: string): Promise<void> {
     const wordBankFile = await this.getWordBankFile();
     const curDate = getCurrentDate();
-  
+
+    const linkPath = source.path.replace(/\.md$/, '');
+    const dateHeading = `### ${curDate}`;
+    const sourceHeading = `#### [[${linkPath}]]`;
+    const entry = `- ${text.trim().replace(/\n+/g, ' ')} [[${linkPath}#^${blockId}|↗]]`;
+
     let content = await this.app.vault.read(wordBankFile);
-    let wordStr = '';
     const lines = content.split('\n');
 
-    let lastDate = '';
-    let strimLength = 0;
+    let dateStart = -1;
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      
-      if (line.startsWith('###')) {
-        if (lastDate.length == 0) {
-          lastDate = line.split('###')[1].trim();
-          if (lastDate !== curDate) {
-            wordStr += `### ${curDate}\n`;
-            wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]]) \n`;
-            break;
-          }
-        } else {
-          wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]]) \n`;
-          break;
-        }
+      if (lines[i].trim() === dateHeading) {
+        dateStart = i;
+        break;
       }
-
-      if (i == lines.length - 1) {
-        if (lastDate.length == 0) {
-          wordStr += `### ${curDate}\n`;
-        }
-        wordStr += ` - ${text} ([[${source.name}#^${blockId} | ${source.basename}]])`;
-      }
-      wordStr += `${line}\n`;
-      strimLength += line.length + 1;
     }
 
-    content = content.substring(strimLength);
-    wordStr += content.trim();
+    if (dateStart === -1) {
+      const section = `${dateHeading}\n${sourceHeading}\n${entry}`;
+      content = content.trim().length ? `${section}\n\n${content.replace(/^\n+/, '')}` : `${section}\n`;
+      await this.app.vault.modify(wordBankFile, content);
+      return;
+    }
 
-    await this.app.vault.modify(wordBankFile, `${wordStr}`);
+    let dateEnd = lines.length;
+    for (let i = dateStart + 1; i < lines.length; i++) {
+      if (lines[i].startsWith('### ')) {
+        dateEnd = i;
+        break;
+      }
+    }
+
+    let sourceStart = -1;
+    for (let i = dateStart + 1; i < dateEnd; i++) {
+      if (lines[i].trim() === sourceHeading) {
+        sourceStart = i;
+        break;
+      }
+    }
+
+    if (sourceStart === -1) {
+      lines.splice(dateEnd, 0, sourceHeading, entry, '');
+      await this.app.vault.modify(wordBankFile, lines.join('\n'));
+      return;
+    }
+
+    let sourceEnd = dateEnd;
+    for (let i = sourceStart + 1; i < dateEnd; i++) {
+      if (lines[i].startsWith('#### ') || lines[i].startsWith('### ')) {
+        sourceEnd = i;
+        break;
+      }
+    }
+
+    let insertIndex = sourceEnd;
+    while (insertIndex > sourceStart + 1 && lines[insertIndex - 1].trim() === '') {
+      insertIndex--;
+    }
+    lines.splice(insertIndex, 0, entry);
+
+    await this.app.vault.modify(wordBankFile, lines.join('\n'));
   }
 
   async handleAddToWordBankRequest(word: string, source: TFile, editor: Editor): Promise<void> {
-    const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word).replace('{CONTEXT}', getCurrentContext(editor)).replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English');
+    const context = getCurrentContext(editor);
+    const prompt = GENERATE_WORD_PHONETICS_TEMPLATE.replace('{WORD}', word).replace('{CONTEXT}', context).replace('{LANGUAGE}', this.settings.stuSettings.localLanguage === 'zh-Hans'?'中文':'English');
     let result = await sendLLMRequest(prompt, this.settings.llmSettings);
     let lastLine = editor.lastLine();
     const lastLineText = editor.getLine(lastLine);
